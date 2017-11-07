@@ -19,12 +19,14 @@ with open('./train_data/aalborg.csv') as csvfile:
 
     del X[0]
 
+
 # The in-data are all the external variables
 in_data = []
 for row in X:
     in_data.append(row[4:25])
 
 # This is the output data (accelerate/brake/steering)
+out_data = []
 for row in X:
     out_data.append(row[0:3])
 
