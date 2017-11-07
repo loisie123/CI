@@ -2,6 +2,8 @@ import numpy as np
 import csv
 import ast
 
+
+
 # sigmoid function
 def nonlin(x,deriv=False):
     if(deriv==True):
@@ -9,6 +11,7 @@ def nonlin(x,deriv=False):
     return 1/(1+np.exp(-x))
 
 # input dataset
+
 with open('./train_data/aalborg.csv') as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
 
