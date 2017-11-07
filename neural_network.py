@@ -1,6 +1,8 @@
 import numpy as np
 import csv
 
+
+
 # sigmoid function
 def nonlin(x,deriv=False):
     if(deriv==True):
@@ -8,11 +10,21 @@ def nonlin(x,deriv=False):
     return 1/(1+np.exp(-x))
 
 # input dataset
-dataset <- "./train_data/aalborg.csv"
-with open(dataset, 'rb') as csvfile:
-    data = csv.reader(csvfile, delimiter=' ')
-        for row in data:
-            print ', '.join(row)
+
+f = open("train_data/aalborg.csv")
+reader = csv.reader(f)
+for row in reader:
+    print (row)
+
+
+
+# with open(dataset, 'rb') as csvfile:
+#     data = csv.reader(csvfile, delimiter=' ')
+#     for row in data:
+#         print (row)
+#
+
+
 X = np.array([  [0,0,1],
                 [0,1,1],
                 [1,0,1],
