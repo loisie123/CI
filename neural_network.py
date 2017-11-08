@@ -12,7 +12,7 @@ def nonlin(x,deriv=False):
 
 # input dataset
 
-with open('./train_data/aalborg.csv') as csvfile:
+with open('train_data/aalborg.csv') as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
 
 
