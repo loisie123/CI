@@ -6,7 +6,7 @@ import csv
 dtype = torch.FloatTensor
 # dtype = torch.cuda.FloatTensor # Uncomment this to run on GPU
 
-with open('./train_data/aalborg.csv') as csvfile:
+with open('/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv') as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
 
 
@@ -22,10 +22,15 @@ in_data = []
 for row in X:
     in_data.append(row[4:25])
 
+input_data = torch.FloatTensor(in_data)
+
 # This is the output data (accelerate/brake/steering)
 out_data = []
 for row in X:
     out_data.append(row[0:3])
+
+output_data = torch.FloatTensor(out_data)
+
 
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
@@ -34,8 +39,8 @@ N, D_in, H, D_out = 4320, 21, 10, 3
 # Create random Tensors to hold input and outputs, and wrap them in Variables.
 # Setting requires_grad=False indicates that we do not need to compute gradients
 # with respect to these Variables during the backward pass.
-x = Variable(torch.randn(N, D_in).type(dtype), requires_grad=False)
-y = Variable(torch.randn(N, D_out).type(dtype), requires_grad=False)
+x = Variable(input_data.type(dtype), requires_grad=False)
+y = Variable(output_data.type(dtype), requires_grad=False)
 
 
 # x = Variable(torch.FloatTensor(out_data[0:100]).type(dtype), requires_grad=False)
