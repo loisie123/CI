@@ -17,11 +17,12 @@ def data():
     return in_data[0:10], target[0:10]
 
 
+in_data, target = data()
 #function that calculates a step forward.
 
 #klopt iets net,
 def forward(inp, W):
-    b = 0.001
+    b = 0.1
     z1 = inp * W[0]
     z2 = inp * W[1]
     z3 = inp * W[2]
