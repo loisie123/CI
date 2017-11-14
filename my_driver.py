@@ -19,7 +19,7 @@ from neural_try import *
 
 
 
-with open('/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv') as csvfile:
+with open('train_data/aalborg.csv') as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
     X = []
     for row in readCSV:
@@ -42,24 +42,19 @@ def create_ouput(input_line):
     """
     Function that creates output from an input_line
     """
-    w1, w2 = train_NN('/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+    w1, w2 = train_NN('train_data/aalborg.csv')
     y_variable = torch.autograd.Variable(input_line, requires_grad=False)
     ipt = y_variable.view(1, 21)
     y_pred = ipt.mm(w1)
     out = y_pred.mm(w2)
     #output variables 0: acceleration  (has to be zero or 1)
-    print(out[0,0])
-    if out[0,0] > 0.5:
-        out[0,0] = 1
-    else:
-        out[0,0] = 0
-    print(out[0,0])
+   
 
     return out
 
 
 
-
+print("Hello ")
 
 
 
