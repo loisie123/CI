@@ -1,10 +1,7 @@
 from pytocl.driver import Driver
 from pytocl.car import State, Command
-
 import logging
-
 import math
-
 from pytocl.analysis import DataLogWriter
 from pytocl.car import State, Command, MPS_PER_KMH
 from pytocl.controller import CompositeController, ProportionalController, IntegrationController, DerivativeController
@@ -40,22 +37,22 @@ class MyDriver(Driver):
             input_line.append(carstate.distances_from_edge[i]   )
 
         output = self.create_ouput((input_line))
-        # accelarator = output.data[0,0]
+        print(output)
+        accelarator = output.data[0,0]
         breake = output.data[0,1]
-        # if accelarator > 0.5:
-        #     command.accelerator = 1.0
-        # else:
-        #     command.accelerator = 0.0
-        #
-        # print(command.accelerator)
+        if accelarator > 0.5:
+            command.accelerator = 1.0
+        else:
+            command.accelerator = 0.0
+
+        print(command.accelerator)
 
         if breake > 0.5:
-            command.brake = 1
+             command.brake = 1
         else:
             command.brake = 0
-        print(command.brake)
-        if command.brake == 0 and command.accelerator == 1:
-            print("it can now drive")
+
+
         command.steering =  output.data[0,2]
         self.steer(carstate, 0.0, command)
 
