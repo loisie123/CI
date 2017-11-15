@@ -1,14 +1,18 @@
-# from pytocl.driver import Driver
-# from pytocl.car import State, Command
+from pytocl.driver import Driver
+from pytocl.car import State, Command
+
+import logging
+
+import math
+
+from pytocl.analysis import DataLogWriter
+from pytocl.car import State, Command, MPS_PER_KMH
+from pytocl.controller import CompositeController, ProportionalController, IntegrationController, DerivativeController
 from neural_try import *
-import csv
-import numpy
 
 class MyDriver(Driver):
-    """
-    """
 
-    def __init__(self, logdata =True):
+    def __init__(self, logdata=True):
         self.steering_ctrl = CompositeController(
             ProportionalController(0.4),
             IntegrationController(0.2, integral_limit=1.5),
@@ -19,9 +23,10 @@ class MyDriver(Driver):
         )
         self.data_logger = DataLogWriter() if logdata else None
 
+        self.w1, self.w2 = NN('/home/student/Documents/CI/torcs-server/torcs-client/train_data/aalborg.csv')
 
-    def drive(self, carstate: State):
 
+    def drive(self, carstate: State) -> Command:
         """
         Produces driving command in response to newly received car state.
 
@@ -29,29 +34,32 @@ class MyDriver(Driver):
         lot of inputs. But it will get the car (if not disturbed by other
         drivers) successfully driven along the race track.
         """
-
         command = Command()
+        input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
+        for i in range(1,len(carstate.distances_from_edge)):
+            input_line.append(carstate.distances_from_edge[i]   )
 
-        output = create_ouput(carstate)
-        accelarator = output.data[0,0]
+        output = self.create_ouput((input_line))
+        # accelarator = output.data[0,0]
         breake = output.data[0,1]
-
-
-        if accelarator > 0.5:
-            command.accelarator = 1
-        else:
-            command.accelarator = 0
+        # if accelarator > 0.5:
+        #     command.accelerator = 1.0
+        # else:
+        #     command.accelerator = 0.0
+        #
+        # print(command.accelerator)
 
         if breake > 0.5:
             command.brake = 1
         else:
             command.brake = 0
-
-
-        command.steer =  output.data[0,2]
+        print(command.brake)
+        if command.brake == 0 and command.accelerator == 1:
+            print("it can now drive")
+        command.steering =  output.data[0,2]
         self.steer(carstate, 0.0, command)
 
-        # ACC_LATERAL_MAX = 6400 * 5
+	# ACC_LATERAL_MAX = 6400 * 5
         # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
         v_x = 80
 
@@ -62,70 +70,16 @@ class MyDriver(Driver):
 
         return command
 
-
-    def train_NN(path_to_filename):
-        w1, w2 = NN(path_to_filename)
-        return w1, w2
-
-
-    def create_ouput(input_line):
+    def create_ouput(self, input_line):
         """
         Function that creates output from an input_line
         """
-        w1, w2 = train_NN('train_data/aalborg.csv')
-        y_variable = torch.autograd.Variable(input_line, requires_grad=False)
+        tens = torch.FloatTensor(input_line)
+        y_variable = torch.autograd.Variable(tens, requires_grad=False)
         ipt = y_variable.view(1, 21)
-        y_pred = ipt.mm(w1)
-        out = y_pred.mm(w2)
+        y_pred = ipt.mm(self.w1)
+        out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)
 
 
         return out
-
-
-
-#
-#
-# with open('train_data/aalborg.csv') as csvfile:
-#     readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-#     X = []
-#     for row in readCSV:
-#         X.append(row)
-#
-#     del X[0]
-#
-#     # The in-data are all the external variables
-# in_data = []
-# for row in X:
-#     in_data.append(row[4:25])
-# firstline = torch.FloatTensor(in_data[0])
-#
-# # function that calls on the neural network
-#
-# def train_NN(path_to_filename):
-#     w1, w2 = NN(path_to_filename)
-#     return w1, w2
-#
-# def create_ouput(input_line):
-#      """
-#      Function that creates output from an input_line
-#      """
-#      w1, w2 = train_NN('train_data/aalborg.csv')
-#      y_variable = torch.autograd.Variable(input_line, requires_grad=False)
-#      ipt = y_variable.view(1, 21)
-#      y_pred = ipt.mm(w1)
-#      out = y_pred.mm(w2)
-#      #output variables 0: acceleration  (has to be zero or 1
-#      return out
-
-
-
-
-
-
-
-
-
-
-
-#input new data into the model and get output that calls on the accelaration methods.
