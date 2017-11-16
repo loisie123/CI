@@ -20,7 +20,7 @@ class MyDriver(Driver):
         )
         self.data_logger = DataLogWriter() if logdata else None
 
-        self.w1, self.w2 = NN('/home/student/Documents/CI/torcs-server/torcs-client/train_data/aalborg.csv')
+        self.w1, self.w2 = NN('/home/student/Documents/CI/torcs-server/torcs-client/train_data/aalborg.csv','/home/student/Documents/CI/torcs-server/torcs-client/train_data/alpine-1.csv','/home/student/Documents/CI/torcs-server/torcs-client/train_data/f-speedway.csv' )
 
 
     def drive(self, carstate: State) -> Command:
@@ -49,7 +49,7 @@ class MyDriver(Driver):
             command.accelerator = 0.0
         else:
             command.accelarator = accelarator
-        print("accelerator", output.data[0,0], command.accelerator)
+        print("äccelerator", output.data[0,0], command.accelerator)
 
         if breake > 1.0:
              command.brake = 1.0
@@ -63,8 +63,7 @@ class MyDriver(Driver):
         print("steer:" , output.data[0,2], command.steering)
 
         print ("tweede command:", command)
-
-
+        print("ajdshjkfhjklfsjhsajjfdsjhjlasjhlasdhjldshj")
         self.steer(carstate, 0.0, command)
 
 	# ACC_LATERAL_MAX = 6400 * 5
@@ -84,7 +83,7 @@ class MyDriver(Driver):
         """
         tens = torch.FloatTensor(input_line)
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
-        ipt = y_variable.view(1, 21)
+        ipt = y_variable.view(1, 22)
         y_pred = ipt.mm(self.w1)
         out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)

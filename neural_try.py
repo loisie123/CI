@@ -66,7 +66,7 @@ def NN(path_to_filename, path_to_filename2 = None, path_to_filename3  = None):
     w2 = Variable(torch.randn(H, D_out).type(dtype), requires_grad=True)
 
     learning_rate = 1e-17
-    for t in range(1000000):
+    for t in range(100000000):
       # Forward pass: compute predicted y using operations on Variables; these
       # are exactly the same operations we used to compute the forward pass using
       # Tensors, but we do not need to keep references to intermediate values since
@@ -95,5 +95,3 @@ def NN(path_to_filename, path_to_filename2 = None, path_to_filename3  = None):
       w2.grad.data.zero_()
       print(w1)
       return w1, w2
-
-NN('/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv','/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
