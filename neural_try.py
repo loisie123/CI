@@ -9,22 +9,31 @@ dtype = torch.FloatTensor
 # dtype = torch.cuda.FloatTensor # Uncomment this to run on GPU
 
 
-def NN(path_to_filename):
+def NN(path_to_filename, path_to_filename2 = None, path_to_filename3  = None):
     with open(path_to_filename) as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-
-
         X = []
         for row in readCSV:
             X.append(row)
 
-        del X[0]
+    if path_to_filename2 != None:
+        with open(path_to_filename2) as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+            for row in readCSV:
+                X.append(row)
+    if path_to_filename3 != None:
+        with open(path_to_filename3) as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+            for row in readCSV:
+                X.append(row)
 
 
     # The in-data are all the external variables
     in_data = []
     for row in X:
-        in_data.append(row[4:25])
+        in_data.append(row[3:26])
+
+    print(in_data[1])
 
     input_data = torch.FloatTensor(in_data)
 
@@ -38,7 +47,7 @@ def NN(path_to_filename):
 
     # N is batch size; D_in is input dimension;
     # H is hidden dimension; D_out is output dimension.
-    N, D_in, H, D_out = 4320, 21, 5, 3
+    N, D_in, H, D_out = 21406, 22, 5, 3
 
     # Create random Tensors to hold input and outputs, and wrap them in Variables.
     # Setting requires_grad=False indicates that we do not need to compute gradients
@@ -86,3 +95,5 @@ def NN(path_to_filename):
       w2.grad.data.zero_()
       print(w1)
       return w1, w2
+
+NN('/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv','/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )

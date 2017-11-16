@@ -33,7 +33,7 @@ class MyDriver(Driver):
         """
         command = Command()
         input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
-        for i in range(1,len(carstate.distances_from_edge)):
+        for i in range(len(carstate.distances_from_edge)):
             input_line.append(carstate.distances_from_edge[i]   )
 
         output = self.create_ouput((input_line))
@@ -49,7 +49,7 @@ class MyDriver(Driver):
             command.accelerator = 0.0
         else:
             command.accelarator = accelarator
-        print("äccelerator", output.data[0,0], command.accelerator)
+        print("accelerator", output.data[0,0], command.accelerator)
 
         if breake > 1.0:
              command.brake = 1.0
@@ -63,7 +63,8 @@ class MyDriver(Driver):
         print("steer:" , output.data[0,2], command.steering)
 
         print ("tweede command:", command)
-        print("ajdshjkfhjklfsjhsajjfdsjhjlasjhlasdhjldshj")
+
+
         self.steer(carstate, 0.0, command)
 
 	# ACC_LATERAL_MAX = 6400 * 5
