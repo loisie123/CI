@@ -38,7 +38,7 @@ def NN(path_to_filename):
 
     # N is batch size; D_in is input dimension;
     # H is hidden dimension; D_out is output dimension.
-    N, D_in, H, D_out = 4320, 21, 10, 3
+    N, D_in, H, D_out = 4320, 21, 5, 3
 
     # Create random Tensors to hold input and outputs, and wrap them in Variables.
     # Setting requires_grad=False indicates that we do not need to compute gradients
@@ -56,8 +56,8 @@ def NN(path_to_filename):
     w1 = Variable(torch.randn(D_in, H).type(dtype), requires_grad=True)
     w2 = Variable(torch.randn(H, D_out).type(dtype), requires_grad=True)
 
-    learning_rate = 1e-6
-    for t in range(500):
+    learning_rate = 1e-17
+    for t in range(1000000):
       # Forward pass: compute predicted y using operations on Variables; these
       # are exactly the same operations we used to compute the forward pass using
       # Tensors, but we do not need to keep references to intermediate values since
@@ -84,5 +84,5 @@ def NN(path_to_filename):
       # Manually zero the gradients after running the backward pass
       w1.grad.data.zero_()
       w2.grad.data.zero_()
-
+      print(w1)
       return w1, w2

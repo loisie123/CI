@@ -38,22 +38,32 @@ class MyDriver(Driver):
 
         output = self.create_ouput((input_line))
         print(output)
+
+        print("eerste command",  command)
         accelarator = output.data[0,0]
         breake = output.data[0,1]
-        if accelarator > 0.5:
+        if accelarator > 1:
             command.accelerator = 1.0
-        else:
+            print(command.accelerator)
+        elif accelarator < 0.0:
             command.accelerator = 0.0
-
-        print(command.accelerator)
-
-        if breake > 0.5:
-             command.brake = 1
         else:
-            command.brake = 0
+            command.accelarator = accelarator
+        print("äccelerator", output.data[0,0], command.accelerator)
 
+        if breake > 1.0:
+             command.brake = 1.0
+        elif breake < 0.0:
+            command.brake = 0.0
+        else:
+            command.brake = breake
+        print("brake:" , output.data[0,1], command.brake)
 
         command.steering =  output.data[0,2]
+        print("steer:" , output.data[0,2], command.steering)
+
+        print ("tweede command:", command)
+        print("ajdshjkfhjklfsjhsajjfdsjhjlasjhlasdhjldshj")
         self.steer(carstate, 0.0, command)
 
 	# ACC_LATERAL_MAX = 6400 * 5
