@@ -9,8 +9,8 @@ class Net(nn.Module):
         #if len(H) == []: raise ValueError("list of layers is empty")
 
         super(Net, self).__init__()
-        self.lin1 = nn.Linear(3, 5)
-        self.lin2 = nn.Linear(5, 23)
+        self.lin1 = nn.Tanh(22, 5)
+        self.lin2 = nn.Linear(5, 3)
         # create module list
         #self.linear = [nn.Linear(D_in, H[0])]
         #for i in range(len(H)-1):
@@ -19,7 +19,10 @@ class Net(nn.Module):
 
 
     def forward(self, x):
-        x = self.lin2(self.lin1(x))
+        x = self.lin2(nn.functional.relu(self.lin1(x)))
+        # of probeer
+        # x = self.lin2(self.lin1(x).clamp(min=0))
+        # x = self.lin2(self.lin1(x))
 
         # Max pooling over a (2, 2) window
         #x = nn.functional.max_pool2d(nn.functional.relu(self.conv1(x)), (2, 2))

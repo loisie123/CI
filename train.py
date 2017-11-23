@@ -47,13 +47,16 @@ def create_folds(X, k):
     return folds
 
 
-def train(fold, H, lr, iterations):
-
-    net = Net() # kloppen 3 en 23 ?
+def train(net, fold, lr, iterations):
 
     train_data = fold[0]
-    train_input = Variable(torch.FloatTensor(train_data[:][3:]).type(dtype), requires_grad=False)
-    train_target = Variable(torch.FloatTensor(train_data[:][:3]).type(dtype), requires_grad=False)
+    in_data = []
+    out_data = []
+    for row in train_data:
+        in_data.append(row[3:])
+        out_data.append(row[:3])
+    train_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
+    train_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
 
     # try different loss functions
     loss_function = nn.MSELoss()
@@ -82,8 +85,13 @@ def train(fold, H, lr, iterations):
 
     # find loss of test set
     test_data = fold[1]
-    test_input = Variable(torch.FloatTensor(test_data[:][3:]).type(dtype), requires_grad=False)
-    test_target = Variable(torch.FloatTensor(test_data[:][:3]).type(dtype), requires_grad=False)
+    in_data = []
+    out_data = []
+    for row in train_data:
+        in_data.append(row[3:])
+        out_data.append(row[:3])
+    test_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
+    test_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
     test_output = net(test_input)
     test_loss = loss_function(test_output, test_target)
 
@@ -95,24 +103,26 @@ parameters:
 path_to_filename
 path_to_filename2 (default is None)
 path_to_filename3 (default is None)
-H: list of non-zero integers; the kth number corresponds with the number of nodes in the kth hidden layer
 lr: learning rate (default is 1e-17)
 iterations: number of iterations (non-zero integer)
 k: number of folds (non-zero integer)
 """
-def main(H,iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
+def main(net, iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
 
     X = open_file(path_to_filename, path_to_filename2, path_to_filename3)
     folds = create_folds(X, k)
 
     best_weights = None
     error = 10^40
-    for fold in folds:
-        weights, test_loss = train(fold, H, lr, iterations)
-        if error > test_loss:
-            error = test_loss
-            best_weights = weights
+    #for fold in folds:
+    weights, test_loss = train(net, folds[0], lr, iterations)
+        # if error > test_loss:
+        #     error = test_loss
+        #     best_weights = weights
 
-    return best_weights
+    return weights
 
-main(1, 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
+net = Net()
+
+main(net, 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
+print(net.parameters())
