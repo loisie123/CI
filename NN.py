@@ -5,9 +5,9 @@ import torch.nn as nn
 class Net(nn.Module):
 
     def __init__(self):
-        
+
         #if len(H) == []: raise ValueError("list of layers is empty")
-        
+
         super(Net, self).__init__()
         self.lin1 = nn.Linear(3, 5)
         self.lin2 = nn.Linear(5, 23)
@@ -16,11 +16,11 @@ class Net(nn.Module):
         #for i in range(len(H)-1):
         #    self.linear.append(nn.Linear(H[i], H[i+1]))
         #self.linear.append(nn.Linear(H[-1],D_out))
-        
+
 
     def forward(self, x):
         x = self.lin2(self.lin1(x))
-        
+
         # Max pooling over a (2, 2) window
         #x = nn.functional.max_pool2d(nn.functional.relu(self.conv1(x)), (2, 2))
         # If the size is a square you can only specify a single number
