@@ -41,8 +41,9 @@ def create_folds(X, k):
     return folds
 
 
-def train(net, fold, lr, iterations):
-
+def train( fold, lr, iterations):
+    forward_info = [('', 22), ('s', 8), ('t', 5), ('l', 3)]
+    net = Net(forward_info)
     # make data ready for use
     train_data = fold[0]
     in_data = []
@@ -94,7 +95,7 @@ def train(net, fold, lr, iterations):
     test_output = net(test_input)
     test_loss = loss_function(test_output, test_target)
 
-    return net.parameters(), test_loss.data[0]
+    return net, test_loss.data[0]
 
 
 """
@@ -105,25 +106,26 @@ path_to_filename3 (default is None)
 lr: learning rate (default is 1e-17)
 iterations: number of iterations (non-zero integer)
 k: number of folds (non-zero integer)
-"""
-def main(net, iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
 
+"""
+
+def main(iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
     X = open_file(path_to_filename, path_to_filename2, path_to_filename3)
     folds = create_folds(X, k)
 
-    best_weights = None
+    best_net = None
     error = 10^40
     for fold in folds:
-        weights, test_loss = train(net, fold, lr, iterations)
+        net, test_loss = train( fold, lr, iterations)
         if error > test_loss:
             error = test_loss
-            best_weights = weights
+            best_net = net
 
     # als het goed is werkt de k-fold cross validation nu wel
     # als het toch niet werkt dan kan je het weer commenten en de volgende regel uncommenten:
     # best_weights, _ = train(net, folds[0], lr, iterations)
 
-    return best_weights
+    return best_net
 
 
 """
@@ -141,11 +143,11 @@ Dingen die wij kunnen proberen zijn:
 # LET OP: de eerste string is leeg; deze gebruiken wij namelijk niet.. (je kan er dus ook iets anders leuks opschrijven)
 # een tuple bevat een integer dat staat voor de aantal nodes in de desbetreffende layer
 
-forward_info = [('l', 22), ('s', 8), ('t', 5), ('l', 3)]
+#forward_info = [('l', 22), ('s', 8), ('t', 5), ('l', 3)]
 #
-net = Net(forward_info)
+#net = Net(forward_info)
 
-print(net.parameters())
+#print(net.parameters())
 #
-# main(net, 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
+#smain(net, 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
 # print(net.parameters())
