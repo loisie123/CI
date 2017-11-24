@@ -7,6 +7,7 @@ from pytocl.car import State, Command, MPS_PER_KMH
 from pytocl.controller import CompositeController, ProportionalController, IntegrationController, DerivativeController
 from neural_try import *
 from NN import *
+from train import *
 
 
 class MyDriver(Driver):
@@ -21,10 +22,10 @@ class MyDriver(Driver):
             ProportionalController(3.7),
         )
         self.data_logger = DataLogWriter() if logdata else None
-        forward_info = [('', 22), ('s', 8), ('t', 5), ('l', 3)]
-        self.net = Net(forward_info)
-        main(net , 10000, 5,'/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
+        self.trainNetwork()
 
+    def trainNetwork(self):
+        net = main( 10000, 5,'/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
 
     def drive(self, carstate: State) -> Command:
         """

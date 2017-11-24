@@ -31,8 +31,8 @@ def selectParents(fitness = None):
 
 def mutate(weights_matrices):
 
-    ## INPUT: list of weights matrices of network, can be any number.
-    ## OUTPUT: list of weights matrices (mutated with probability .2) of mutated network.
+    ## INPUT: list of weights arrays of network, can be any number.
+    ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network.
 
     mutation = []
 
@@ -50,10 +50,36 @@ def mutate(weights_matrices):
     else:
         return weights_matrices
 
-def breed(network1, network2):
-    return child1, child2
+def breed(network1, network2): # TODO: Needs to be finished
 
+    ## INPUT: list of weights arrays of parent network 1 and list of weights array of parent network 2.
+    ## OUTPUT: list of weights arrays of child network 1 and list of weights arrays of child network 2
 
+    # Child 1
+    CH1 = []
+    for ind, mat in enumerate(arr1):
+        child1 = np.zeros((mat.shape[0], mat.shape[1]))
+        for idx, row in enumerate(mat):
+            selection_indicator = np.random.choice(2, 1, p=[.8, .2]) # 0 for parent 1, 1 for parent 2
+            if selection_indicator == 0:
+                child1[idx] = arr1[ind][idx]
+            else:
+                child1[idx] = arr2[ind][idx]
+        CH1.append(child1)
+
+    # Child 2
+    CH2 = []
+    for ind, mat in enumerate(arr1):
+        child2 = np.zeros((mat.shape[0], mat.shape[1]))
+        for idx, row in enumerate(mat):
+            selection_indicator = np.random.choice(2, 1, p=[.8, .2]) # 0 for parent 1, 1 for parent 2
+            if selection_indicator == 0:
+                child2[idx] = arr1[ind][idx]
+            else:
+                child2[idx] = arr2[ind][idx]
+        CH2.append(child2)
+
+    return CH1, CH2
 
 def main():
     #dit is de main function.
