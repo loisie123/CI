@@ -49,10 +49,10 @@ def train(net, fold, lr, iterations):
     out_data = []
     print("Error? dan werkt row[3:]+[0]*36 op regel 58 niet")
     for row in train_data:
-        in_data.append(row[3:]+[0]*36)
+        #in_data.append(row[3:]+[0]*36)
         # in_data.append(row[3:]+[200]*36)
         # in_data.append(row[3:]+[0 for i in range(36)])
-        # in_data.append(row[3:])
+        in_data.append(row[3:])
         out_data.append(row[:3])
     train_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
     train_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
@@ -144,6 +144,8 @@ Dingen die wij kunnen proberen zijn:
 forward_info = [('l', 22), ('s', 8), ('t', 5), ('l', 3)]
 #
 net = Net(forward_info)
+
+print(net.parameters())
 #
 # main(net, 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
 # print(net.parameters())

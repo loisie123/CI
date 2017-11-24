@@ -12,12 +12,13 @@ class Net(nn.Module):
         self.activ = []
         for i in range(len(forward_info)-1):
             print(forward_info[i][0])
-            if forward_info[i][0] == 'l':
-                self.activ.append(nn.Linear(forward_info[i][0], forward_info[i][1]))
-            elif forward_info[i][0] == 't':
-                self.activ.append(nn.Tanh(forward_info[i][0], forward_info[i][1]))
-            elif forward_info[i][0] == 's':
-                self.activ.append(nn.Sigmoid(forward_info[i][0], forward_info[i][1]))
+            if forward_info[i+1][0] == 'l':
+                print(forward_info[i+1][0],  forward_info[i][1])
+                self.activ.append(nn.Linear(forward_info[i][1], forward_info[i+1][1]))
+            elif forward_info[i+1][0] == 't':
+                self.activ.append(nn.Linear(forward_info[i][1], forward_info[i+1][1]))
+            elif forward_info[i+1][0] == 's':
+                self.activ.append(nn.Linear(forward_info[i][1], forward_info[i+1][1]))
             else:
                 raise ValueError("forward_info is not well-defined")
 
@@ -25,12 +26,12 @@ class Net(nn.Module):
     def forward(self, x):
 
         # als dit niet goed werkt kan je andere opties hier beneden even proberen
-        for activ_func in self.activ:
-            x = activ_func(x)
+        # for activ_func in self.activ:
+        #     x = activ_func(x)
 
-        #x = self.activ[0](x)
-        #for i in range(1,len(self.activ)):
-            #x = self.activ[i](nn.functional.relu(x))
+        x = self.activ[0](x)
+        for i in range(1,len(self.activ)):
+            x = self.activ[i](nn.Tanh(x))
 
         #x = self.activ[0](x)
         #for i in range(1,len(self.activ)):
