@@ -22,7 +22,9 @@ class MyDriver(Driver):
             ProportionalController(3.7),
         )
         self.data_logger = DataLogWriter() if logdata else None
-        self.trainNetwork()
+        #self.trainNetwork()
+        self.w1, self.w2 = NN('/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
+        self.number_of_carstates = 0
 
     def trainNetwork(self):
         net = main( 10000, 5,'/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
@@ -41,10 +43,7 @@ class MyDriver(Driver):
             input_line.append(carstate.distances_from_edge[i]   )
 
         output = self.create_ouput((input_line))
-        print(output)
-        accelarator = nonlin(output.data[0,0])
-        breake = nonlin(output.data[0,1])
-        print("eerste command",  command)
+
         accelarator = output.data[0,0]
         breake = output.data[0,1]
         if accelarator > 1:
@@ -54,24 +53,25 @@ class MyDriver(Driver):
             command.accelerator = 0.0
         else:
             command.accelarator = accelarator
-        print("äccelerator", output.data[0,0], command.accelerator)
+
 
         if breake > 1.0:
-             command.brake = 1.0
+             command.brake = 0.9
         elif breake < 0.0:
             command.brake = 0.0
         else:
             command.brake = breake
-        print("brake:" , output.data[0,1], command.brake)
+
 
         command.steering =  output.data[0,2]
-        print("steer:" , output.data[0,2], command.steering)
 
-        print ("tweede command:", command)
-        print("ajdshjkfhjklfsjhsajjfdsjhjlasjhlasdhjldshj")
         self.steer(carstate, 0.0, command)
-
-	# ACC_LATERAL_MAX = 6400 * 5
+        print("damage:", carstate.damage)
+        print("distance:", carstate.distance_raced)
+        self.number_of_carstates += 1
+        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
+        print("score :", score)
+           # ACC_LATERAL_MAX = 6400 * 5
         # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
         v_x = 80
 
@@ -82,6 +82,11 @@ class MyDriver(Driver):
 
         return command
 
+
+    def fitnesfunction(self, damage, afstandcenter,carstates):
+        score = afstandcenter/carstates - damage
+        return score
+
     def create_ouput(self, input_line):
         """
         Function that creates output from an input_line
@@ -90,9 +95,9 @@ class MyDriver(Driver):
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
         ipt = y_variable.view(1, 22)
 
-        out = self.net(inp)
-        # y_pred = ipt.mm(self.w1)
-        # out = y_pred.mm(self.w2)
+        #out = self.net(inp)
+        y_pred = ipt.mm(self.w1)
+        out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)
 
 
