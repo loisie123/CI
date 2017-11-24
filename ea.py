@@ -1,13 +1,26 @@
 import random
 import operator
 import numpy as np
+from NN import *
+from neural_try import *
 
-def makepopulation(first = False):
-    #amaakt de eerste populatie
-    return population
+def makepopulation(generatie):
+    if generatie == 1:
+        pop = []
+        for i in range(20):
+            # TODO this must be random.
+            forward_info = [('l', 22), ('s', 8), ('t', 5), ('l', 3)]
 
-def fitness():
-    return fitness
+            #make a network
+            net = Net(forward_info)
+
+            pop.append(net)
+
+    return pop
+
+def fitnesfunction(self, damage, distance_raced ,carstates):
+    score = distance_raced/carstates - damage
+    return score
 
 def selectParents(fitness = None):
 
@@ -82,5 +95,15 @@ def breed(network1, network2): # TODO: Needs to be finished
     return CH1, CH2
 
 def main():
-    #dit is de main function.
+    # make a population:
+    population = makepopulation(first = False)
+
+
+    #TODO: moet gaan autorijden om de fitnesscore te krijgen.
+
+
+
     return new_popultion
+
+
+main()
