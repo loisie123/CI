@@ -11,7 +11,8 @@ def fitness():
 
 def selectParents(fitness = None):
 
-    ## Returns indexes in fitness list of selected parents (5 best and 3 random) ##
+    ## INPUT: list of fitness values of networks
+    ## OUTPUT: index of 5 best networks in fitness-list, index of 3 random networks in fitness-list.
 
     control = fitness[:]
 
@@ -28,11 +29,26 @@ def selectParents(fitness = None):
 
     return index_beste, index_random
 
-def mutate(random):
-    #mutate de random selection
+def mutate(weights_matrices):
 
-    return network
+    ## INPUT: list of weights matrices of network, can be any number.
+    ## OUTPUT: list of weights matrices (mutated with probability .2) of mutated network.
 
+    mutation = []
+
+    mutation_indicator = np.random.choice(2, 1, p=[.8, .2])
+
+    if mutation_indicator == 1:
+        print("MUTATION")
+        for idx, mat in enumerate(weights_matrices):
+            mat = np.asarray(mat)
+            new = np.random.permutation(mat)
+            mutation.append(new)
+
+        return mutation
+
+    else:
+        return weights_matrices
 
 def breed(network1, network2):
     return child1, child2
