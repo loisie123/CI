@@ -141,9 +141,9 @@ Dingen die wij kunnen proberen zijn:
 # LET OP: de eerste string is leeg; deze gebruiken wij namelijk niet.. (je kan er dus ook iets anders leuks opschrijven)
 # een tuple bevat een integer dat staat voor de aantal nodes in de desbetreffende layer
 
-# forward_info = [('', 22), ('s', 8), ('t', 5), ('l', 3)]
+forward_info = [('l', 22), ('s', 8), ('t', 5), ('l', 3)]
 #
-# net = Net(forward_info)
+net = Net(forward_info)
 #
 # main(net, 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
 # print(net.parameters())

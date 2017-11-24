@@ -13,11 +13,11 @@ class Net(nn.Module):
         for i in range(len(forward_info)-1):
             print(forward_info[i][0])
             if forward_info[i][0] == 'l':
-                self.activ.append(nn.Linear(forward_info[1][i], forward_info[1][i+1]))
+                self.activ.append(nn.Linear(forward_info[i][0], forward_info[i][1]))
             elif forward_info[i][0] == 't':
-                self.activ.append(nn.Tanh(forward_info[1][i], forward_info[1][i+1]))
+                self.activ.append(nn.Tanh(forward_info[i][0], forward_info[i][1]))
             elif forward_info[i][0] == 's':
-                self.activ.append(nn.Sigmoid(forward_info[1][i], forward_info[1][i+1]))
+                self.activ.append(nn.Sigmoid(forward_info[i][0], forward_info[i][1]))
             else:
                 raise ValueError("forward_info is not well-defined")
 
