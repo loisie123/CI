@@ -21,8 +21,8 @@ class MyDriver(Driver):
             ProportionalController(3.7),
         )
         self.data_logger = DataLogWriter() if logdata else None
-
-        self.net = Net()
+        forward_info = [('', 22), ('s', 8), ('t', 5), ('l', 3)]
+        self.net = Net(forward_info)
         main(net , 10000, 5,'/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
 
 
@@ -41,7 +41,8 @@ class MyDriver(Driver):
 
         output = self.create_ouput((input_line))
         print(output)
-
+        accelarator = nonlin(output.data[0,0])
+        breake = nonlin(output.data[0,1])
         print("eerste command",  command)
         accelarator = output.data[0,0]
         breake = output.data[0,1]
