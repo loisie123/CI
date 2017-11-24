@@ -1,154 +1,136 @@
-import torch
-from torch.autograd import Variable
-import torch.nn as nn
-import csv
+from pytocl.driver import Driver
+from pytocl.car import State, Command
+import logging
+import math
+from pytocl.analysis import DataLogWriter
+from pytocl.car import State, Command, MPS_PER_KMH
+from pytocl.controller import CompositeController, ProportionalController, IntegrationController, DerivativeController
+from neural_try import *
 from NN import *
-
-dtype = torch.FloatTensor
-
-def open_file(path_to_filename, path_to_filename2, path_to_filename3):
-    with open(path_to_filename) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-        X = []
-        for row in readCSV:
-            X.append(row)
-    if path_to_filename2 != None:
-        with open(path_to_filename2) as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-            for row in readCSV:
-                X.append(row)
-    if path_to_filename3 != None:
-        with open(path_to_filename3) as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-            for row in readCSV:
-                X.append(row)
-    return X
+from train import *
+from ea import *
 
 
-def create_folds(X, k):
-    """
-    Create k folds of equal size for data set X.
-    X is a list and k is a non-zero integer.
-    """
-    N = len(X)
-    if k > N: k = N # set k to N if k if bigger than the size of data set
-    fold_size = round(N/k)
-    folds = []
-    for i in range(k):
-        train_set = X[:i*fold_size] + X[:(i+1)*fold_size]
-        test_set = X[i*fold_size:(i+1)*fold_size]
-        folds.append([train_set, test_set])
-    return folds
+class MyDriver(Driver):
+
+    def __init__(self, logdata=True):
+        self.steering_ctrl = CompositeController(
+            ProportionalController(0.4),
+            IntegrationController(0.2, integral_limit=1.5),
+            DerivativeController(2)
+        )
+        self.acceleration_ctrl = CompositeController(
+            ProportionalController(3.7),
+        )
+        self.data_logger = DataLogWriter() if logdata else None
+        #self.trainNetwork()
+        self.number_of_carstates = 0
+
+        # make a population and choose a model:
+        self.population = makepopulation(generatie = 1)
+
+        #state aanmaken:
+        self.begin_damage = 0.1
+        self.begin_distance = 0.1
+        self.start_carstate = 0.1
+
+        # maak eerste network
+        self.net = self.population[0]
+        self.w1 = self.net[0]
+        self.w2 = self.net[1]
+        self.model_number = 0
+
+        self.list_of_scores = []
 
 
-def train( fold, lr, iterations):
-    forward_info = [('', 22), ('s', 8), ('t', 5), ('l', 3)]
-    net = Net(forward_info)
-    # make data ready for use
-    train_data = fold[0]
-    in_data = []
-    out_data = []
-    print("Error? dan werkt row[3:]+[0]*36 op regel 58 niet")
-    for row in train_data:
-        #in_data.append(row[3:]+[0]*36)
-        # in_data.append(row[3:]+[200]*36)
-        # in_data.append(row[3:]+[0 for i in range(36)])
-        in_data.append(row[3:])
-        out_data.append(row[:3])
-    train_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
-    train_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
+        #net = main( 10000, 5,'/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
 
-    # try different loss functions
-    loss_function = nn.MSELoss()
-    # nn.CrossEntropyLoss()
+    def drive(self, carstate: State) -> Command:
+        """
+        Produces driving command in response to newly received car state.
 
-    # try different weight optimizers
-    # for example: SGD, Nesterov-SGD, Adam, RMSProp, etc
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr)
-
-    for i in range(iterations):
-        # zero gradient buffers
-        optimizer.zero_grad()
-
-        # find output of network
-        train_output = net(train_input)
-
-        # error of output and target
-        loss = loss_function(train_output, train_target)
-
-        # backpropagate the error
-        loss.backward()
-
-        # update the weights
-        optimizer.step()
+        This is a dummy driving routine, very dumb and not really considering a
+        lot of inputs. But it will get the car (if not disturbed by other
+        drivers) successfully driven along the race track.
+        """
 
 
-    # find loss of test set
-    test_data = fold[1]
-    in_data = []
-    out_data = []
-    for row in train_data:
-        in_data.append(row[3:])
-        out_data.append(row[:3])
-    test_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
-    test_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
-    test_output = net(test_input)
-    test_loss = loss_function(test_output, test_target)
 
-    return net, test_loss.data[0]
+        command = Command()
+        input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
+        for i in range(len(carstate.distances_from_edge)):
+            input_line.append(carstate.distances_from_edge[i]   )
+
+        output = self.create_ouput((input_line))
+        accelarator = output.data[0,0]
+        breake = output.data[0,1]
+        # als het goed is met een beter neural network hoeft dit niet meer.
+        if accelarator > 1:
+            command.accelerator = 1.0
+        elif accelarator < 0.0:
+            command.accelerator = 0.0
+        else:
+            command.accelarator = accelarator
+        if breake > 1.0:
+             command.brake = 0.9
+        elif breake < 0.0:
+            command.brake = 0.0
+        else:
+            command.brake = breake
+
+        command.steering =  output.data[0,2]
+
+        self.steer(carstate, 0.0, command)
+
+        self.number_of_carstates += 1
+        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
+
+           # ACC_LATERAL_MAX = 6400 * 5
+        # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+        if self.number_of_carstates == 500:
+            self.list_of_scores.append(score)
+            #change the model:
+            self.changemodel(carstate.damage, carstate.distance_raced, self.number_of_carstates)
+            print("Change the model:")
+            print(self.list_of_scores)
+            self.number_of_carstates = 0
+        v_x = 80
+        self.accelerate(carstate, v_x, command)
+
+        if self.data_logger:
+            self.data_logger.log(carstate, command)
+
+        return command
+
+    def changemodel(self, damage, distance, states):
+        self.model_number += 1
+        self.begin_damage = damage
+        self.begin_distance = distance- 0.001
+        self.start_carstate = states
+        print("model_number=", self.model_number)
+        self.net = self.population[self.model_number]
+        self.w1 = self.net[0]
+        self.w2 = self.net[1]
+
+    def fitnesfunction(self, damage, afstandcenter,carstates):
+        if self.model_number == 0:
+            score = afstandcenter/carstates - damage
+        else:
+            score = (afstandcenter - self.begin_distance)/(carstates) - (damage- self.begin_damage)
+        return score
+
+    def create_ouput(self, input_line):
+        """
+        Function that creates output from an input_line
+        """
+        tens = torch.FloatTensor(input_line)
+        y_variable = torch.autograd.Variable(tens, requires_grad=False)
+        ipt = y_variable.view(1, 22)
+
+        #out = self.net(inp)
+        y_pred = ipt.mm(self.w1)
+        out = y_pred.mm(self.w2)
+        #output variables 0: acceleration  (has to be zero or 1)
 
 
-"""
-parameters:
-path_to_filename
-path_to_filename2 (default is None)
-path_to_filename3 (default is None)
-lr: learning rate (default is 1e-17)
-iterations: number of iterations (non-zero integer)
-k: number of folds (non-zero integer)
-
-"""
-
-def main(iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
-    X = open_file(path_to_filename, path_to_filename2, path_to_filename3)
-    folds = create_folds(X, k)
-
-    best_net = None
-    error = 10^40
-    for fold in folds:
-        net, test_loss = train( fold, lr, iterations)
-        if error > test_loss:
-            error = test_loss
-            best_net = net
-
-    # als het goed is werkt de k-fold cross validation nu wel
-    # als het toch niet werkt dan kan je het weer commenten en de volgende regel uncommenten:
-    # best_weights, _ = train(net, folds[0], lr, iterations)
-
-    return best_net
-
-
-"""
-Dingen die wij kunnen proberen zijn:
-- forward_info aanpassen
-- loss_function aanpassen (in train())
-- optimizer aanpassen (in train())
-- k aanpassen
-- lr aanpassen -> veel gebruikte techniek is: start with large, if training crit div, try 3 times smaller, etc until no diverges is observed
-
-"""
-
-# list van tuples
-# een tuple bevat een string: 'l'(=lineair), 's'(=sigmoid) of 't'(=tanh) die staat voor de soort activatiefunctie
-# LET OP: de eerste string is leeg; deze gebruiken wij namelijk niet.. (je kan er dus ook iets anders leuks opschrijven)
-# een tuple bevat een integer dat staat voor de aantal nodes in de desbetreffende layer
-
-#forward_info = [('l', 22), ('s', 8), ('t', 5), ('l', 3)]
-#
-#net = Net(forward_info)
-
-#print(net.parameters())
-#
-
-main( 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
-print(net.parameters())
+        return out
