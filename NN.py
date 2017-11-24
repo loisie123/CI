@@ -4,39 +4,36 @@ import torch.nn as nn
 
 class Net(nn.Module):
 
-    def __init__(self):
-
-        #if len(H) == []: raise ValueError("list of layers is empty")
+    def __init__(self, forward_info):
 
         super(Net, self).__init__()
-        self.lin1 = nn.Tanh(22, 5)
-        self.lin2 = nn.Linear(5, 3)
+
         # create module list
-        #self.linear = [nn.Linear(D_in, H[0])]
-        #for i in range(len(H)-1):
-        #    self.linear.append(nn.Linear(H[i], H[i+1]))
-        #self.linear.append(nn.Linear(H[-1],D_out))
+        self.activ = []
+        for i in range(len(forward_info)-1):
+            print(forward_info[i][0])
+            if forward_info[i][0] == 'l':
+                self.activ.append(nn.Linear(forward_info[1][i], forward_info[1][i+1]))
+            elif forward_info[i][0] == 't':
+                self.activ.append(nn.Tanh(forward_info[1][i], forward_info[1][i+1]))
+            elif forward_info[i][0] == 's':
+                self.activ.append(nn.Sigmoid(forward_info[1][i], forward_info[1][i+1]))
+            else:
+                raise ValueError("forward_info is not well-defined")
 
 
     def forward(self, x):
-        x = self.lin2(nn.functional.relu(self.lin1(x)))
-        # of probeer
-        # x = self.lin2(self.lin1(x).clamp(min=0))
-        # x = self.lin2(self.lin1(x))
 
-        # Max pooling over a (2, 2) window
-        #x = nn.functional.max_pool2d(nn.functional.relu(self.conv1(x)), (2, 2))
-        # If the size is a square you can only specify a single number
-        #x = nn.functional.max_pool2d(nn.functional.relu(self.conv2(x)), 2)
-        #x = x.view(-1, self.num_flat_features(x))
-        #x = nn.functional.relu(self.fc1(x))
-        #x = nn.functional.relu(self.fc2(x))
-        #x = self.fc3(x)
+        # als dit niet goed werkt kan je andere opties hier beneden even proberen
+        for activ_func in self.activ:
+            x = activ_func(x)
+
+        #x = self.activ[0](x)
+        #for i in range(1,len(self.activ)):
+            #x = self.activ[i](nn.functional.relu(x))
+
+        #x = self.activ[0](x)
+        #for i in range(1,len(self.activ)):
+            #x = self.activ[i](x..clamp(min=0))
+
         return x
-
-    def num_flat_features(self, x):
-        size = x.size()[1:]  # all dimensions except the batch dimension
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features
