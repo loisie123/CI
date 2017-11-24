@@ -23,7 +23,7 @@ class MyDriver(Driver):
         self.data_logger = DataLogWriter() if logdata else None
 
         self.w1, self.w2 = NN('/home/student/Documents/CI/torcs-server/torcs-client/train_data/aalborg.csv','/home/student/Documents/CI/torcs-server/torcs-client/train_data/alpine-1.csv','/home/student/Documents/CI/torcs-server/torcs-client/train_data/f-speedway.csv' )
-        self.net = Net()
+        net = Net()
         main(net , 10000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
 
 
@@ -89,9 +89,9 @@ class MyDriver(Driver):
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
         ipt = y_variable.view(1, 22)
 
-        y_pred = net(input_line)
-        y_pred = ipt.mm(self.w1)
-        out = y_pred.mm(self.w2)
+        out = net(inp)
+        # y_pred = ipt.mm(self.w1)
+        # out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)
 
 
