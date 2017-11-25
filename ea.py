@@ -1,8 +1,8 @@
 import random
 import operator
 import numpy as np
-from NN import *
-from neural_try import *
+# from NN import *
+# from neural_try import *
 
 def makepopulation(generatie):
     if generatie == 1:
@@ -75,26 +75,26 @@ def breed(network1, network2):
 
     # Child 1
     CH1 = []
-    for ind, mat in enumerate(arr1):
+    for ind, mat in enumerate(network1):
         child1 = np.zeros((mat.shape[0], mat.shape[1]))
         for idx, row in enumerate(mat):
             selection_indicator = np.random.choice(2, 1, p=[.8, .2]) # 0 for parent 1, 1 for parent 2
             if selection_indicator == 0:
-                child1[idx] = arr1[ind][idx]
+                child1[idx] = network1[ind][idx]
             else:
-                child1[idx] = arr2[ind][idx]
+                child1[idx] = network2[ind][idx]
         CH1.append(child1)
 
     # Child 2
     CH2 = []
-    for ind, mat in enumerate(arr1):
+    for ind, mat in enumerate(network1):
         child2 = np.zeros((mat.shape[0], mat.shape[1]))
         for idx, row in enumerate(mat):
-            selection_indicator = np.random.choice(2, 1, p=[.8, .2]) # 0 for parent 1, 1 for parent 2
+            selection_indicator = np.random.choice(2, 1, p=[.5, .5]) # 0 for parent 1, 1 for parent 2
             if selection_indicator == 0:
-                child2[idx] = arr1[ind][idx]
+                child2[idx] = network1[ind][idx]
             else:
-                child2[idx] = arr2[ind][idx]
+                child2[idx] = network2[ind][idx]
         CH2.append(child2)
 
     return CH1, CH2
