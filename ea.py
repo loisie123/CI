@@ -99,6 +99,15 @@ def breed(network1, network2):
 
     return CH1, CH2
 
+def selectSurvivors(fitness = None):
+
+    ## INPUT: list of fitness values of networks
+    ## OUTPUT: index of 4 best networks in fitness-list (survivors)
+
+    index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-4:] # Take 4 best
+
+    return index_beste
+
 def main():
     # make a population:
     population = makepopulation(first = False)
