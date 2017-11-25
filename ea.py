@@ -68,7 +68,7 @@ def mutate(weights_matrices):
     else:
         return weights_matrices
 
-def breed(network1, network2): # TODO: Needs to be finished
+def breed(network1, network2):
 
     ## INPUT: list of weights arrays of parent network 1 and list of weights array of parent network 2.
     ## OUTPUT: list of weights arrays of child network 1 and list of weights arrays of child network 2
