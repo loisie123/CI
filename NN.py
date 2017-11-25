@@ -1,40 +1,41 @@
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
+import random
+
+
+class AttrProxy(object):
+    """Translates index lookups into attribute lookups."""
+    def __init__(self, module, prefix):
+        self.module = module
+        self.prefix = prefix
+
+    def __getitem__(self, i):
+        return getattr(self.module, self.prefix + str(i))
 
 class Net(nn.Module):
 
-    def __init__(self, forward_info):
+    def __init__(self):
 
         super(Net, self).__init__()
 
-        # create module list
-        self.activ = []
-        for i in range(len(forward_info)-1):
-            print(forward_info[i][0])
-            if forward_info[i+1][0] == 'l':
-                print(forward_info[i+1][0],  forward_info[i][1])
-                self.activ.append(nn.Linear(forward_info[i][1], forward_info[i+1][1]))
-            elif forward_info[i+1][0] == 't':
-                self.activ.append(nn.Linear(forward_info[i][1], forward_info[i+1][1]))
-            elif forward_info[i+1][0] == 's':
-                self.activ.append(nn.Linear(forward_info[i][1], forward_info[i+1][1]))
-            else:
-                raise ValueError("forward_info is not well-defined")
+        numbers = [3,4,5,6,7,8]
+        num_of_hidden_layers = random.choice(numbers)
+        layer_info = [22] # [58]
+        for i in range(num_of_hidden_layers):
+            layer_info.append(random.choice(numbers))
+        layer_info.append(3)
 
+        # create modules
+        self.steps = len(layer_info)-1
+        for i in range(self.steps):
+            self.add_module('step_' + str(i), nn.Linear(layer_info[i], layer_info[i+1]))
+        self.step = AttrProxy(self, 'step_')
 
     def forward(self, x):
-
-        # als dit niet goed werkt kan je andere opties hier beneden even proberen
-        # for activ_func in self.activ:
-        #     x = activ_func(x)
-
-        x = self.activ[0](x)
-        for i in range(1,len(self.activ)):
-            x = self.activ[i](nn.Tanh(x))
-
-        #x = self.activ[0](x)
-        #for i in range(1,len(self.activ)):
-            #x = self.activ[i](x..clamp(min=0))
-
+        tanh = nn.Tanh()
+        x = self.step[0](x)
+        for i in range(1, self.steps-1):
+            x = self.step[i](tanh(x))
+        x = self.step[self.steps-1](x)
         return x

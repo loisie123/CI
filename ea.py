@@ -8,11 +8,13 @@ def makepopulation(generatie):
     if generatie == 1:
         pop = []
         for i in range(20):
-            w1,w2 = NN('/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
-            net = (w1, w2)
+            #w1,w2 = NN( ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
+            #net = (w1, w2)
 
             # this must be with Mirthes network
-            #forward_info = [('l', 22), ('s', 8), ('t', 5), ('l', 3)]
+
+            net = Net()
+            main(1000, 5, '/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
 
             #make a network
             #net = Net(forward_info)

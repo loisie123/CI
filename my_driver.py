@@ -36,8 +36,6 @@ class MyDriver(Driver):
 
         # maak eerste network
         self.net = population[0]
-        self.w1 = self.net[0]
-        self.w2 = self.net[1]
         self.model_number = 0
 
 
@@ -106,8 +104,8 @@ class MyDriver(Driver):
         self.begin_distance = distance
         self.start_carstate = states
         self.net = population[model_number]
-        self.w1 = net[0]
-        self.w2 = net[1]
+        #self.w1 = net[0]
+        #self.w2 = net[1]
 
     def fitnesfunction(self, damage, afstandcenter,carstates):
         if self.model_number == 0:
@@ -124,9 +122,9 @@ class MyDriver(Driver):
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
         ipt = y_variable.view(1, 22)
 
-        #out = self.net(inp)
-        y_pred = ipt.mm(self.w1)
-        out = y_pred.mm(self.w2)
+        out = self.net(inp)
+        #y_pred = ipt.mm(self.w1)
+        #out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)
 
 
