@@ -78,7 +78,7 @@ def breed(network1, network2):
     for ind, mat in enumerate(network1):    # for every weight matrix
         child1 = np.zeros((mat.shape[0], mat.shape[1])) # create zero matrix
         for idx, row in enumerate(mat): # for every row in current weight matrix
-            selection_indicator = np.random.choice(2, 1, p=[.8, .2]) # choose parent (0 for parent 1, 1 for parent 2)
+            selection_indicator = np.random.choice(2, 1, p=[.5, .5]) # choose parent (0 for parent 1, 1 for parent 2)
             if selection_indicator == 0:
                 child1[idx] = network1[ind][idx] # take row from parent 1
             else:
