@@ -102,6 +102,7 @@ class MyDriver(Driver):
 
         return command
 
+
     def changemodel(self, damage, distance, states):
         self.model_number += 1
         self.begin_damage = damage
@@ -114,9 +115,9 @@ class MyDriver(Driver):
 
     def fitnesfunction(self, damage, afstandcenter,carstates):
         if self.model_number == 0:
-            score = afstandcenter/carstates - damage
+            score = afstandcenter - damage
         else:
-            score = (afstandcenter - self.begin_distance)/(carstates) - (damage- self.begin_damage)
+            score = (afstandcenter - self.begin_distance) - (damage- self.begin_damage)
         return score
 
     def create_ouput(self, input_line):
@@ -131,6 +132,4 @@ class MyDriver(Driver):
         # y_pred = ipt.mm(self.w1)
         # out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)
-
-
         return out
