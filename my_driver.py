@@ -30,13 +30,17 @@ class MyDriver(Driver):
         self.population = makepopulation(generatie = 1)
 
         #state aanmaken:
-        self.begin_damage = 0
-        self.begin_distance = 0
-        self.start_carstate = 0
+        self.begin_damage = 0.1
+        self.begin_distance = 0.1
+        self.start_carstate = 0.1
 
         # maak eerste network
-        self.net = population[0]
+        self.net = self.population[0]
+        # self.w1 = self.net[0]
+        # self.w2 = self.net[1]
         self.model_number = 0
+
+        self.list_of_scores = []
 
 
         #net = main( 10000, 5,'/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
@@ -63,7 +67,6 @@ class MyDriver(Driver):
         # als het goed is met een beter neural network hoeft dit niet meer.
         if accelarator > 1:
             command.accelerator = 1.0
-            print(command.accelerator)
         elif accelarator < 0.0:
             command.accelerator = 0.0
         else:
@@ -79,18 +82,19 @@ class MyDriver(Driver):
 
         self.steer(carstate, 0.0, command)
 
-        print("damage:", carstate.damage)
-        print("distance:", carstate.distance_raced)
         self.number_of_carstates += 1
         score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
-        print("score :", score)
+
            # ACC_LATERAL_MAX = 6400 * 5
         # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
-        v_x = 80
-        if score < 0.02:
+        if self.number_of_carstates == 500:
+            self.list_of_scores.append(score)
             #change the model:
             self.changemodel(carstate.damage, carstate.distance_raced, self.number_of_carstates)
             print("Change the model:")
+            print(self.list_of_scores)
+            self.number_of_carstates = 0
+        v_x = 80
         self.accelerate(carstate, v_x, command)
 
         if self.data_logger:
@@ -98,20 +102,21 @@ class MyDriver(Driver):
 
         return command
 
-    def changemodel(damage, distance, states):
+    def changemodel(self, damage, distance, states):
         self.model_number += 1
         self.begin_damage = damage
-        self.begin_distance = distance
+        self.begin_distance = distance- 0.001
         self.start_carstate = states
-        self.net = population[model_number]
-        #self.w1 = net[0]
-        #self.w2 = net[1]
+        print("model_number=", self.model_number)
+        self.net = self.population[self.model_number]
+        # self.w1 = self.net[0]
+        # self.w2 = self.net[1]
 
     def fitnesfunction(self, damage, afstandcenter,carstates):
         if self.model_number == 0:
             score = afstandcenter/carstates - damage
         else:
-            score = (afstandcenter - self.begin_distance)/(carstate - self.start_carstate) - (damage- self.begin_damage)
+            score = (afstandcenter - self.begin_distance)/(carstates) - (damage- self.begin_damage)
         return score
 
     def create_ouput(self, input_line):
@@ -122,9 +127,9 @@ class MyDriver(Driver):
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
         ipt = y_variable.view(1, 22)
 
-        out = self.net(inp)
-        #y_pred = ipt.mm(self.w1)
-        #out = y_pred.mm(self.w2)
+        out = self.net(ipt)
+        # y_pred = ipt.mm(self.w1)
+        # out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)
 
 
