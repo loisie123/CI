@@ -133,3 +133,10 @@ class MyDriver(Driver):
         # out = y_pred.mm(self.w2)
         #output variables 0: acceleration  (has to be zero or 1)
         return out
+
+    def on_shotdown(self):
+        """
+        functions that is called when the server requested drive shutdown.
+        """
+
+        print("ik wil weten wanneer ik aangeroepen word.s")
