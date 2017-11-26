@@ -139,4 +139,14 @@ class MyDriver(Driver):
         functions that is called when the server requested drive shutdown.
         """
 
+        # de lijst met alle netwerken
+        # de lijst met de fitnesfunctions
+
+        # selectparents(0)
+
+        # make children
+
+        # save children.
+
+
         print("ik wil weten wanneer ik aangeroepen word.s")
