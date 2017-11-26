@@ -14,7 +14,7 @@ def makepopulation(generatie):
             # this must be with Mirthes network
 
             net = Net()
-            main(1000, 5, '/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
+            main(1000, 5, '/home/student/CI/train_data/aalborg.csv' , path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
 
             #make a network
             #net = Net(forward_info)
