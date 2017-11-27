@@ -94,6 +94,8 @@ class MyDriver(Driver):
             print("Change the model:")
             print(self.list_of_scores)
             self.number_of_carstates = 0
+            if self.number_of_carstate  == len(self.population):
+                self.on_shotdown()
         v_x = 80
         self.accelerate(carstate, v_x, command)
 
@@ -139,13 +141,27 @@ class MyDriver(Driver):
         functions that is called when the server requested drive shutdown.
         """
 
-        # de lijst met alle netwerken
-        # de lijst met de fitnesfunctions
+        index_best, index_worst  = selectparents(self.list_of_scores)
+        best = []
+        torch.save(self.poulation, 'lijstvanparent.pt')
+        #find out which networks are the best and worst
+        for i in range(len(index_best)):
+            best.append(self.population[index_best[i]])
+        worst = []
+        for i in range(len(index_worst)):
+            worst.append(self.population[index_worst[i]])
 
-        # selectparents(0)
+        #mutate networks
+        for network in worst:
+            mutate(network.paramaters)
 
-        # make children
+        parents = best + worst
 
+        #randomly select parents
+        #chidl1, child2 = breead(parent1, parent2)
+        #child.appen(child1)
+        #child.append(child2)
+        #torch.save(parents, 'lijstvanparent.pt')
         # save children.
 
 
