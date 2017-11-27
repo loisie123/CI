@@ -1,26 +1,28 @@
 import random
 import operator
 import numpy as np
-# from NN import *
+from NN import *
+from train import *
 # from neural_try import *
 
-def makepopulation(generatie):
-    if generatie == 1:
+def makepopulation(generatie, parents_file = None):
+    if parents_file == None:
         pop = []
-        for i in range(20):
+        for i in range(10):
             #w1,w2 = NN( ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
             #net = (w1, w2)
 
             # this must be with Mirthes network
 
             net = Net()
-            main(1000, 5, '/home/student/CI/train_data/aalborg.csv' , path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
+            main1(1000, 5, '/home/student/CI/train_data/aalborg.csv', path_to_filename2= '/home/student/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
 
             #make a network
             #net = Net(forward_info)
 
             pop.append(net)
-
+    else:
+        pop = torch.load(parents_file)
     return pop
 
 
