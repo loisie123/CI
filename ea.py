@@ -23,9 +23,6 @@ def makepopulation(generatie):
 
     return pop
 
-def fitnesfunction(self, damage, distance_raced ,carstates):
-    score = distance_raced/carstates - damage
-    return score
 
 def selectParents(fitness = None):
 
@@ -46,6 +43,8 @@ def selectParents(fitness = None):
         index_random.append(control.index(item))    # get the index
 
     return index_beste, index_random
+
+    
 
 def mutate(weights_matrices):
 
