@@ -1,6 +1,7 @@
 from pytocl.driver import Driver
 from pytocl.car import State, Command
 import logging
+import torch
 import math
 from pytocl.analysis import DataLogWriter
 from pytocl.car import State, Command, MPS_PER_KMH
@@ -27,7 +28,7 @@ class MyDriver(Driver):
         self.number_of_carstates = 0
 
         # make a population and choose a model:
-        self.population = makepopulation(generatie = 1)
+        self.population = makepopulation(generatie = 1, parents_file = '/home/student/CI/lijstvanparent.pt')
 
         #state aanmaken:
         self.begin_damage = 0.1
@@ -35,7 +36,7 @@ class MyDriver(Driver):
         self.start_carstate = 0.1
 
         # maak eerste network
-        self.net = self.population[0]
+        self.net = self.population[6]
         # self.w1 = self.net[0]
         # self.w2 = self.net[1]
         self.model_number = 0
@@ -61,23 +62,10 @@ class MyDriver(Driver):
         for i in range(len(carstate.distances_from_edge)):
             input_line.append(carstate.distances_from_edge[i]   )
 
-        output = self.create_ouput((input_line))
-        accelarator = output.data[0,0]
-        breake = output.data[0,1]
-        # als het goed is met een beter neural network hoeft dit niet meer.
-        if accelarator > 1:
-            command.accelerator = 1.0
-        elif accelarator < 0.0:
-            command.accelerator = 0.0
-        else:
-            command.accelarator = accelarator
-        if breake > 1.0:
-             command.brake = 0.9
-        elif breake < 0.0:
-            command.brake = 0.0
-        else:
-            command.brake = breake
 
+        output = self.create_ouput((input_line))
+        command.accelarator = output.data[0,0]
+        command.brake = output.data[0,1]
         command.steering =  output.data[0,2]
 
         self.steer(carstate, 0.0, command)
@@ -85,16 +73,21 @@ class MyDriver(Driver):
         self.number_of_carstates += 1
         score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
 
-           # ACC_LATERAL_MAX = 6400 * 5
-        # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
-        if self.number_of_carstates == 500:
+        #als de auto stilstaat.
+        if 70 < carstate.angle < 120 and carstate.speed_x < 0.0:
+            command.gear = -1
+               # ACC_LATERAL_MAX = 6400 * 5
+            # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+        if self.number_of_carstates > 500 and  -50 < carstate.angle < 50 :
             self.list_of_scores.append(score)
-            #change the model:
+                #change the model:
             self.changemodel(carstate.damage, carstate.distance_raced, self.number_of_carstates)
             print("Change the model:")
             print(self.list_of_scores)
             self.number_of_carstates = 0
-            if self.number_of_carstate  == len(self.population):
+
+                #when last network is reached
+            if self.model_number + 1  == len(self.population):
                 self.on_shotdown()
         v_x = 80
         self.accelerate(carstate, v_x, command)
@@ -141,9 +134,12 @@ class MyDriver(Driver):
         functions that is called when the server requested drive shutdown.
         """
 
-        index_best, index_worst  = selectparents(self.list_of_scores)
+        print("ik wil opslaan")
+        torch.save(self.population, 'lijstvanparent.pt')
+        index_best, index_worst  = selectParents(self.list_of_scores)
+        print("index_best", index_best)
+        print("index_worst", index_worst)
         best = []
-        torch.save(self.poulation, 'lijstvanparent.pt')
         #find out which networks are the best and worst
         for i in range(len(index_best)):
             best.append(self.population[index_best[i]])
@@ -166,3 +162,25 @@ class MyDriver(Driver):
 
 
         print("ik wil weten wanneer ik aangeroepen word.s")
+
+    def drive2(self, carstate: State):
+        """
+        Produces driving command in response to newly received car state.
+
+        This is a dummy driving routine, very dumb and not really considering a
+        lot of inputs. But it will get the car (if not disturbed by other
+        drivers) successfully driven along the race track.
+        """
+        command = Command()
+        self.steer(carstate, 0.0, command)
+
+        # ACC_LATERAL_MAX = 6400 * 5
+        # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+        v_x = 80
+
+        self.accelerate(carstate, v_x, command)
+
+        if self.data_logger:
+            self.data_logger.log(carstate, command)
+
+        return command
