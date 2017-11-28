@@ -27,8 +27,9 @@ class MyDriver(Driver):
         #self.trainNetwork()
         self.number_of_carstates = 0
 
+        #
         # make a population and choose a model:
-        self.population = makepopulation(generatie = 1, parents_file = '/home/student/CI/lijstvanparent.pt')
+        self.population = makepopulation(1, parents_file = '/home/student/lijstvanparent.pt' )
 
         #state aanmaken:
         self.begin_damage = 0.1
@@ -77,16 +78,18 @@ class MyDriver(Driver):
         #als de auto stilstaat.
         if 70 < carstate.angle < 120 and carstate.speed_x < 0.0:
             command.gear = -1
+
+
         ACC_LATERAL_MAX = 6400 * 5
-        v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+        v_x = min(100, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
 
         #wissel van neurale netwerken:
-        if self.number_of_carstates > 500 and  -50 < carstate.angle < 50 :
+        if self.number_of_carstates > 1000 and  -50 < carstate.angle < 50 :
             self.list_of_scores.append(score)
             self.changemodel(carstate.damage, carstate.distance_raced, self.number_of_carstates)
             print("Change the model:")
             print(self.list_of_scores)
-
+            print(self.model_number)
 
             #when last network is reached
             if self.model_number + 1  == len(self.population):
