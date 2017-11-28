@@ -9,20 +9,46 @@ from train import *
 def makepopulation(generatie, parents_file = None):
     if parents_file == None:
         pop = []
-        for i in range(10):
-            #w1,w2 = NN( ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
-            #net = (w1, w2)
+        for j in range(1, 5):
+            array = np.zeros(2+j)
+            array[0] = 22
+            array[-1] = 3
+            print(j)
+            for i in range(20):
+                if j == 1:
+                    array[j] = 5
+                if j == 2:
+                    array[j-1] = 6
+                    array[j] = 5
+                if j == 3:
+                    array[j-2] = 7
+                    array[j-1] = 6
+                    array[j] = 5
+                if j == 4:
+                    array[j-3] = 8
+                    array[j-2] = 7
+                    array[j-1] = 6
+                    array[j] = 5
+                if j == 5:
+                    array[j-4] = 9
+                    array[j-3] = 8
+                    array[j-2] = 7
+                    array[j-1] = 6
+                    array[j] = 5
+
+                #w1,w2 = NN( ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
+                #net = (w1, w2)
 
 
-            net = NN([22, 5,3])
-            create_nn(1000, [22,5,3], '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
+                net = NN(array)
+                create_nn(1000, array , '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
 
-            #main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
+                #main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
 
-            #make a network
-            #net = Net(forward_info)
+                #make a network
+                #net = Net(forward_info)
 
-            pop.append(net)
+                #pop.append(net)
     else:
         pop = torch.load(parents_file)
     return pop
@@ -51,29 +77,44 @@ def selectParents(fitness = None):
 def mutate(net, first = False):
 
     ## INPUT: list of weights arrays of network, can be any number.
-    ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network.
+    ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network
+
 
     if first == True:
         para = list(net.parameters()) # Unpack the parameters
     else:
         para = net # is already a normal list
+    params = []
+    mutation_indicator = np.random.choice(2, 1, p=[0, 1.0]) # mutation with probability of .2
 
-    mutation_indicator = np.random.choice(2, 1, p=[0.8, 0.2]) # mutation with probability of .2
 
+    print(list(net.parameters()))
     if mutation_indicator == 1: # if mutate
-        print("MUTATION")
-        for idx, mat in enumerate(para):
-            mat = mat.data.numpy()
+        for idx, mat in enumerate(list(net.parameters())):
+            mat = mat.data.cpu().numpy()
             mat = np.random.permutation(mat)
-            para[idx] = torch.nn.Parameter(torch.from_numpy(mat))
+            params.append(torch.nn.Parameter(torch.from_numpy(mat)))
 
-        net = para
+
+            #net.register_parameter(params)
+
+        #list(net.parameters()) = para
+        #net = para
 
         return net # return list of mutated weight matrices
 
     else: # if not mutate
         net = para
         return net # return original network
+
+
+net = NN([22, 5,3])
+create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+
+net = mutate(net)
+
+
+
 
 def breed(network1, network2):
 
@@ -136,11 +177,12 @@ def selectSurvivors(fitness = None):
 #
 #net = Net()
 
-main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
-
-params1 = list(net.parameters())
-params2 = mutate(net, first = True)
-params3 = mutate(params2)
+# net = NN([22, 5,3])
+# create_nn(1000, [22,5,3], '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
+#
+# params1 = list(net.parameters())
+# params2 = mutate(net, first = True)
+# params3 = mutate(params2)
 
 ## Mutation demonstration
 
@@ -157,8 +199,8 @@ def mutation_demonstration():
             print(x)
     return
 
-mutation_demonstration()
+#mutation_demonstration()
 
-c1, c2 = breed(params1, params3)
+#c1, c2 = breed(params1, params3)
 #pop = makepopulation(1)
 #print(len(pop))
