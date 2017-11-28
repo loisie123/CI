@@ -29,7 +29,8 @@ class MyDriver(Driver):
 
         #
         # make a population and choose a model:
-        self.population = makepopulation(1, parents_file = '/home/student/lijstvanparent.pt' )
+        self.population = makepopulation(1 )
+        torch.save(self.population, 'generatie1.pt')
 
         #state aanmaken:
         self.begin_damage = 0.1

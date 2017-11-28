@@ -9,7 +9,7 @@ from train import *
 def makepopulation(generatie, parents_file = None):
     if parents_file == None:
         pop = []
-        layes = [1,2,3,4,5]
+        lays = [1,2,3,4,5]
         nodes = [9,8,7,6,5]
 
         for j in range(1, 5):
@@ -20,17 +20,12 @@ def makepopulation(generatie, parents_file = None):
                     layers.append(nodes[z])
                 layers.append(3)
                 net = NN(layers)
-                create_nn(1000, layes, '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
+                create_nn(1000, layers, '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
                 pop.append(net)
 
     else:
         pop = torch.load(parents_file)
     return pop
-
-
-makepopulation(1)
-
-
 
 
 def selectParents(fitness = None):
