@@ -81,29 +81,43 @@ def breed(network1, network2):
 
     # Child 1
     CH1 = []    # list to store child 1's weight matrices
+    count = 0
+    total = 0
     for ind, mat in enumerate(network1):    # for every weight matrix
         mat = mat.data.numpy()
         for idx, row in enumerate(mat): # for every row in current weight matrix
             selection_indicator = np.random.choice(2, 1, p=[.5, .5]) # choose parent (0 for parent 1, 1 for parent 2)
             if selection_indicator == 0:
+                count += 1
+                total += 1
                 mat[idx] = network1[ind].data.numpy()[idx] # take row from parent 1
             else:
+                total += 1
                 mat[idx] = network2[ind].data.numpy()[idx] # take row from parent 2
         child1 = torch.nn.Parameter(torch.from_numpy(mat))
         CH1.append(child1)
 
+    print("Child 1: ",count/total * 100,"% from parent 1. ", 100 - (count/total * 100), '% from parent 2.')
+
     # Child 2, same principle
     CH2 = []
+    count = 0
+    total = 0
     for ind, mat in enumerate(network1):
         mat = mat.data.numpy()
         for idx, row in enumerate(mat):
             selection_indicator = np.random.choice(2, 1, p=[.5, .5]) # 0 for parent 1, 1 for parent 2
             if selection_indicator == 0:
+                count += 1
+                total += 1
                 mat[idx] = network1[ind].data.numpy()[idx] # take row from parent 1
             else:
+                total += 1
                 mat[idx] = network2[ind].data.numpy()[idx] # take row from parent 2
         child2 = torch.nn.Parameter(torch.from_numpy(mat))
         CH2.append(child2)
+
+    print("Child 2: ",count/total * 100,"% from parent 1. ", 100 - (count/total * 100), '% from parent 2.')
 
     return CH1, CH2
 
@@ -119,21 +133,30 @@ def selectSurvivors(fitness = None):
 # TODO: Run for example:
 #
 #
-# net = Net()
-# 
-# main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
-#
-# params1 = list(net.parameters())
-# params2 = mutate(net, first = True)
-# params3 = mutate(params2)
-#
-# print("PARENT 1")
-# print(params1)
-# print("PARENT 2")
-# print(params2)
-#
-# c1, c2 = breed(params1, params2)
-# print("CHILD 1")
-# print(c1)
-# print("CHILD 2")
-# print(c2)
+net = Net()
+
+main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
+
+params1 = list(net.parameters())
+params2 = mutate(net, first = True)
+params3 = mutate(params2)
+
+## Mutation demonstration
+
+def mutation_demonstration():
+
+    x = mutate(params3)
+    for i in range(0,1000):
+        x = mutate(x)
+        if i == 0:
+            print("Begin matrix:")
+            print(x)
+        if i == 999:
+            print("End matrix:")
+            print(x)
+    return
+
+# mutation_demonstration()
+
+# Breed 2 networks
+xy = breed(params1,params2)
