@@ -109,7 +109,7 @@ k: number of folds (non-zero integer)
 
 """
 
-def main(iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
+def main1(iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
     X = open_file(path_to_filename, path_to_filename2, path_to_filename3)
     folds = create_folds(X, k)
 
@@ -139,7 +139,7 @@ Discussie punten zijn:
 """
 
 
-net = Net()
+#net = Net()
 
-main(1000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
-print(net.parameters())
+#main(1000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
+#print(net.parameters())

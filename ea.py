@@ -5,6 +5,7 @@ from NN import *
 from train import *
 # from neural_try import *
 
+
 def makepopulation(generatie, parents_file = None):
     if parents_file == None:
         pop = []
@@ -46,28 +47,38 @@ def selectParents(fitness = None):
 
     return index_beste, index_random
 
-    
 
-def mutate(weights_matrices):
+
+def mutate(net):
 
     ## INPUT: list of weights arrays of network, can be any number.
     ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network.
 
     mutation = []
 
-    mutation_indicator = np.random.choice(2, 1, p=[.8, .2]) # mutation with probability of .2
+    mutation_indicator = np.random.choice(2, 1, p=[0, 1]) # mutation with probability of .2
+    para = list(net.parameters())
+    print("parameters 0 ", para[4])
+    print("parameters 1" , para)
 
     if mutation_indicator == 1: # if mutate
         print("MUTATION")
-        for idx, mat in enumerate(weights_matrices):
-            mat = np.asarray(mat)   # make it array
-            new = np.random.permutation(mat)    # shuffle array
-            mutation.append(new)    # add shuffled matrix to list
+        mutation = []
+        for idx, mat in enumerate(list(net.parameters())):
+            mat = mat.data.numpy()
+            np.random.permutation(mat)
+            para[idx] = torch.from_numpy(mat)
+            print("Parameters:" , list(net.parameters())[0])
 
-        return mutation # return list of mutated weight matrices
+
+        net.parameters = para
+
+        print ("helloooo", para)    # shuffle array
+            #  # add shuffled matrix to list
+        return net # return list of mutated weight matrices
 
     else: # if not mutate
-        return weights_matrices # return original network
+        return net # return original network
 
 def breed(network1, network2):
 
@@ -76,7 +87,7 @@ def breed(network1, network2):
 
     # Child 1
     CH1 = []    # list to store child 1's weight matrices
-    for ind, mat in enumerate(network1):    # for every weight matrix
+    for ind, mat in enumerate(list(net.parameters())):    # for every weight matrix
         child1 = np.zeros((mat.shape[0], mat.shape[1])) # create zero matrix
         for idx, row in enumerate(mat): # for every row in current weight matrix
             selection_indicator = np.random.choice(2, 1, p=[.5, .5]) # choose parent (0 for parent 1, 1 for parent 2)
@@ -109,13 +120,15 @@ def selectSurvivors(fitness = None):
 
     return index_beste
 
-def main():
-    # make a population:
-    population = makepopulation(first = False)
 
 
-    #TODO: moet gaan autorijden om de fitnesscore te krijgen.
+net = Net()
 
+main1(1000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+params1 = list(net.parameters())
 
+print(params1)
 
-    return new_popultion
+mutate(net)
+
+params2 = list(net.parameters())
