@@ -46,56 +46,56 @@ class MyDriver(Driver):
 
         #net = main( 10000, 5,'/home/student/CI/train_data/aalborg.csv' ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
 
-    def drive(self, carstate: State) -> Command:
-        """
-        Produces driving command in response to newly received car state.
-
-        This is a dummy driving routine, very dumb and not really considering a
-        lot of inputs. But it will get the car (if not disturbed by other
-        drivers) successfully driven along the race track.
-        """
-
-
-
-        command = Command()
-        input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
-        for i in range(len(carstate.distances_from_edge)):
-            input_line.append(carstate.distances_from_edge[i]   )
-
-
-        output = self.create_ouput((input_line))
-        command.accelarator = output.data[0,0]
-        command.brake = output.data[0,1]
-        command.steering =  output.data[0,2]
-
-        self.steer(carstate, 0.0, command)
-
-        self.number_of_carstates += 1
-        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
-
-        #als de auto stilstaat.
-        if 70 < carstate.angle < 120 and carstate.speed_x < 0.0:
-            command.gear = -1
-               # ACC_LATERAL_MAX = 6400 * 5
-            # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
-        if self.number_of_carstates > 500 and  -50 < carstate.angle < 50 :
-            self.list_of_scores.append(score)
-                #change the model:
-            self.changemodel(carstate.damage, carstate.distance_raced, self.number_of_carstates)
-            print("Change the model:")
-            print(self.list_of_scores)
-            self.number_of_carstates = 0
-
-                #when last network is reached
-            if self.model_number + 1  == len(self.population):
-                self.on_shotdown()
-        v_x = 80
-        self.accelerate(carstate, v_x, command)
-
-        if self.data_logger:
-            self.data_logger.log(carstate, command)
-
-        return command
+    # def drive(self, carstate: State) -> Command:
+    #     """
+    #     Produces driving command in response to newly received car state.
+    #
+    #     This is a dummy driving routine, very dumb and not really considering a
+    #     lot of inputs. But it will get the car (if not disturbed by other
+    #     drivers) successfully driven along the race track.
+    #     """
+    #
+    #
+    #
+    #     command = Command()
+    #     input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
+    #     for i in range(len(carstate.distances_from_edge)):
+    #         input_line.append(carstate.distances_from_edge[i]   )
+    #
+    #
+    #     output = self.create_ouput((input_line))
+    #     command.accelarator = output.data[0,0]
+    #     command.brake = output.data[0,1]
+    #     command.steering =  output.data[0,2]
+    #
+    #     self.steer(carstate, 0.0, command)
+    #
+    #     self.number_of_carstates += 1
+    #     score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
+    #
+    #     #als de auto stilstaat.
+    #     if 70 < carstate.angle < 120 and carstate.speed_x < 0.0:
+    #         command.gear = -1
+    #            # ACC_LATERAL_MAX = 6400 * 5
+    #         # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+    #     if self.number_of_carstates > 500 and  -50 < carstate.angle < 50 :
+    #         self.list_of_scores.append(score)
+    #             #change the model:
+    #         self.changemodel(carstate.damage, carstate.distance_raced, self.number_of_carstates)
+    #         print("Change the model:")
+    #         print(self.list_of_scores)
+    #         self.number_of_carstates = 0
+    #
+    #             #when last network is reached
+    #         if self.model_number + 1  == len(self.population):
+    #             self.on_shotdown()
+    #     v_x = 80
+    #     self.accelerate(carstate, v_x, command)
+    #
+    #     if self.data_logger:
+    #         self.data_logger.log(carstate, command)
+    #
+    #     return command
 
 
     def changemodel(self, damage, distance, states):
@@ -163,7 +163,7 @@ class MyDriver(Driver):
 
         print("ik wil weten wanneer ik aangeroepen word.s")
 
-    def drive2(self, carstate: State):
+    def drive(self, carstate: State) -> Command:
         """
         Produces driving command in response to newly received car state.
 
@@ -172,15 +172,35 @@ class MyDriver(Driver):
         drivers) successfully driven along the race track.
         """
         command = Command()
-        self.steer(carstate, 0.0, command)
 
-        # ACC_LATERAL_MAX = 6400 * 5
-        # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
-        v_x = 80
+        command = Command()
+
+
+
+        self.steer(carstate, 0.0, command)
+        print("print hij iets")
+        ACC_LATERAL_MAX = 6400 * 5
+        v_x = min(200, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+        v_x = 200
 
         self.accelerate(carstate, v_x, command)
 
         if self.data_logger:
             self.data_logger.log(carstate, command)
 
+        #get a line to print the right statements to the carstate.
+        input_line = [self.accelerate(carstate, v_x, command),0 , self.steer(carstate, 0.0, command),carstate.speed_x,carstate.distance_from_center, carstate.angle]
+        for i in range(len(carstate.distances_from_edge)):
+            input_line.append(carstate.distances_from_edge[i])
+        for i in range(len(carstate.opponents)):
+            input_line.append(carstate.opponents[i])
+
+
         return command
+
+    def write_file(self, input_line):
+        files = open("testfile.txt","w")
+        files.write(input_line, "\n")
+        files.close()
+
+        #function that writes info in file
