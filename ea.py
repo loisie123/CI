@@ -157,6 +157,3 @@ def mutation_demonstration():
     return
 
 # mutation_demonstration()
-
-# Breed 2 networks
-xy = breed(params1,params2)
