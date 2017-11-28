@@ -13,7 +13,6 @@ def makepopulation(generatie, parents_file = None):
             array = np.zeros(2+j)
             array[0] = 22
             array[-1] = 3
-            print(j)
             for i in range(20):
                 if j == 1:
                     array[j] = 5
@@ -48,7 +47,8 @@ def makepopulation(generatie, parents_file = None):
                 #make a network
                 #net = Net(forward_info)
 
-                #pop.append(net)
+                pop.append(net)
+
     else:
         pop = torch.load(parents_file)
     return pop
@@ -173,28 +173,34 @@ def selectSurvivors(fitness = None):
     return index_beste
 
 # TODO: Run for example:
-#
-#
-#net = Net()
 
+<<<<<<< HEAD
 # net = NN([22, 5,3])
 # create_nn(1000, [22,5,3], '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
 #
 # params1 = list(net.parameters())
 # params2 = mutate(net, first = True)
 # params3 = mutate(params2)
+=======
+net = create_nn(1000, [22,5,3], '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv')
+# main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
+
+params1 = list(net.parameters())
+params2 = mutate(net, first = True)
+params3 = mutate(params2)
+>>>>>>> 3afa47830fed9bcb953768352de80cdce2681b7d
 
 ## Mutation demonstration
 
 def mutation_demonstration():
 
     x = mutate(params3)
-    for i in range(0,1000):
+    for i in range(0,100):
         x = mutate(x)
         if i == 0:
             print("Begin matrix:")
             print(x)
-        if i == 999:
+        if i == 99:
             print("End matrix:")
             print(x)
     return
