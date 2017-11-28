@@ -9,49 +9,28 @@ from train import *
 def makepopulation(generatie, parents_file = None):
     if parents_file == None:
         pop = []
+        layes = [1,2,3,4,5]
+        nodes = [9,8,7,6,5]
+
         for j in range(1, 5):
-            array = np.zeros(2+j)
-            array[0] = 22
-            array[-1] = 3
             for i in range(20):
-                if j == 1:
-                    array[j] = 5
-                if j == 2:
-                    array[j-1] = 6
-                    array[j] = 5
-                if j == 3:
-                    array[j-2] = 7
-                    array[j-1] = 6
-                    array[j] = 5
-                if j == 4:
-                    array[j-3] = 8
-                    array[j-2] = 7
-                    array[j-1] = 6
-                    array[j] = 5
-                if j == 5:
-                    array[j-4] = 9
-                    array[j-3] = 8
-                    array[j-2] = 7
-                    array[j-1] = 6
-                    array[j] = 5
-
-                #w1,w2 = NN( ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
-                #net = (w1, w2)
-
-
-                net = NN(array)
-                create_nn(1000, array , '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
-
-                #main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
-
-                #make a network
-                #net = Net(forward_info)
-
+                layers = []
+                layers.append(22)
+                for z in range(j):
+                    layers.append(nodes[z])
+                layers.append(3)
+                net = NN(layers)
+                create_nn(1000, layes, '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
                 pop.append(net)
 
     else:
         pop = torch.load(parents_file)
     return pop
+
+
+makepopulation(1)
+
+
 
 
 def selectParents(fitness = None):
@@ -174,21 +153,20 @@ def selectSurvivors(fitness = None):
 
 # TODO: Run for example:
 
-<<<<<<< HEAD
 # net = NN([22, 5,3])
 # create_nn(1000, [22,5,3], '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
 #
 # params1 = list(net.parameters())
 # params2 = mutate(net, first = True)
 # params3 = mutate(params2)
-=======
-net = create_nn(1000, [22,5,3], '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv')
-# main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
-
-params1 = list(net.parameters())
-params2 = mutate(net, first = True)
-params3 = mutate(params2)
->>>>>>> 3afa47830fed9bcb953768352de80cdce2681b7d
+# =======
+# net = create_nn(1000, [22,5,3], '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv')
+# # main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
+#
+# params1 = list(net.parameters())
+# params2 = mutate(net, first = True)
+# params3 = mutate(params2)
+# >>>>>>> 3afa47830fed9bcb953768352de80cdce2681b7d
 
 ## Mutation demonstration
 
