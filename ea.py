@@ -17,8 +17,6 @@ def makepopulation(generatie, parents_file = None):
             net = NN([22, 5,3])
             create_nn(1000, [22,5,3], '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
 
-            #main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
-
             #make a network
             #net = Net(forward_info)
 
@@ -132,11 +130,9 @@ def selectSurvivors(fitness = None):
     return index_beste
 
 # TODO: Run for example:
-#
-#
-#net = Net()
 
-main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
+net = create_nn(1000, [22,5,3], '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv')
+# main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
 
 params1 = list(net.parameters())
 params2 = mutate(net, first = True)
@@ -147,12 +143,12 @@ params3 = mutate(params2)
 def mutation_demonstration():
 
     x = mutate(params3)
-    for i in range(0,1000):
+    for i in range(0,100):
         x = mutate(x)
         if i == 0:
             print("Begin matrix:")
             print(x)
-        if i == 999:
+        if i == 99:
             print("End matrix:")
             print(x)
     return
