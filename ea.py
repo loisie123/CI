@@ -136,11 +136,11 @@ def selectSurvivors(fitness = None):
 #
 #net = Net()
 
-#main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
+main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
 
-#params1 = list(net.parameters())
-#params2 = mutate(net, first = True)
-#params3 = mutate(params2)
+params1 = list(net.parameters())
+params2 = mutate(net, first = True)
+params3 = mutate(params2)
 
 ## Mutation demonstration
 
@@ -157,8 +157,8 @@ def mutation_demonstration():
             print(x)
     return
 
-# mutation_demonstration()
+mutation_demonstration()
 
-#c1, c2 = breed(params1, params3)
+c1, c2 = breed(params1, params3)
 #pop = makepopulation(1)
 #print(len(pop))
