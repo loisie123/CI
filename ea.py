@@ -16,7 +16,7 @@ def makepopulation(generatie, parents_file = None):
             # this must be with Mirthes network
 
             net = Net()
-            main1(1000, 5, '/home/student/CI/train_data/aalborg.csv', path_to_filename2= '/home/student/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
+            main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
 
             #make a network
             #net = Net(forward_info)
@@ -47,37 +47,31 @@ def selectParents(fitness = None):
 
     return index_beste, index_random
 
-
-
-def mutate(net):
+def mutate(net, first = False):
 
     ## INPUT: list of weights arrays of network, can be any number.
     ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network.
 
-    mutation = []
+    if first == True:
+        para = list(net.parameters()) # Unpack the parameters
+    else:
+        para = net # is already a normal list
 
-    mutation_indicator = np.random.choice(2, 1, p=[0, 1]) # mutation with probability of .2
-    para = list(net.parameters())
-    print("parameters 0 ", para[4])
-    print("parameters 1" , para)
+    mutation_indicator = np.random.choice(2, 1, p=[0.8, 0.2]) # mutation with probability of .2
 
     if mutation_indicator == 1: # if mutate
         print("MUTATION")
-        mutation = []
-        for idx, mat in enumerate(list(net.parameters())):
+        for idx, mat in enumerate(para):
             mat = mat.data.numpy()
-            np.random.permutation(mat)
-            para[idx] = torch.from_numpy(mat)
-            print("Parameters:" , list(net.parameters())[0])
+            mat = np.random.permutation(mat)
+            para[idx] = torch.nn.Parameter(torch.from_numpy(mat))
 
+        net = para
 
-        net.parameters = para
-
-        print ("helloooo", para)    # shuffle array
-            #  # add shuffled matrix to list
         return net # return list of mutated weight matrices
 
     else: # if not mutate
+        net = para
         return net # return original network
 
 def breed(network1, network2):
@@ -119,16 +113,3 @@ def selectSurvivors(fitness = None):
     index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-4:] # Take 4 best
 
     return index_beste
-
-
-
-net = Net()
-
-main1(1000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
-params1 = list(net.parameters())
-
-print(params1)
-
-mutate(net)
-
-params2 = list(net.parameters())
