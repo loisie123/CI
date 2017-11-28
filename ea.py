@@ -58,22 +58,20 @@ def mutate(net):
 
     mutation_indicator = np.random.choice(2, 1, p=[0, 1]) # mutation with probability of .2
     para = list(net.parameters())
-    print("parameters 0 ", para[4])
-    print("parameters 1" , para)
 
     if mutation_indicator == 1: # if mutate
-        print("MUTATION")
         mutation = []
         for idx, mat in enumerate(list(net.parameters())):
             mat = mat.data.numpy()
             np.random.permutation(mat)
-            para[idx] = torch.from_numpy(mat)
-            print("Parameters:" , list(net.parameters())[0])
+
+            net.parameters()[idx] = torch.from_numpy(mat)
+            #print("Parameters:" , list(net.parameters())[0])
 
 
         net.parameters = para
 
-        print ("helloooo", para)    # shuffle array
+        #print ("helloooo", para)    # shuffle array
             #  # add shuffled matrix to list
         return net # return list of mutated weight matrices
 
@@ -127,7 +125,7 @@ net = Net()
 main1(1000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
 params1 = list(net.parameters())
 
-print(params1)
+
 
 mutate(net)
 
