@@ -13,10 +13,11 @@ def makepopulation(generatie, parents_file = None):
             #w1,w2 = NN( ,path_to_filename2 = '/home/student/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv')
             #net = (w1, w2)
 
-            # this must be with Mirthes network
 
-            net = Net()
-            main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
+            net = NN([22, 5,3])
+            create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv')
+
+            #main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
 
             #make a network
             #net = Net(forward_info)
@@ -133,13 +134,13 @@ def selectSurvivors(fitness = None):
 # TODO: Run for example:
 #
 #
-net = Net()
+#net = Net()
 
-main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
+#main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv')
 
-params1 = list(net.parameters())
-params2 = mutate(net, first = True)
-params3 = mutate(params2)
+#params1 = list(net.parameters())
+#params2 = mutate(net, first = True)
+#params3 = mutate(params2)
 
 ## Mutation demonstration
 
@@ -158,4 +159,6 @@ def mutation_demonstration():
 
 # mutation_demonstration()
 
-c1, c2 = breed(params1, params3)
+#c1, c2 = breed(params1, params3)
+#pop = makepopulation(1)
+#print(len(pop))

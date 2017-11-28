@@ -3,8 +3,11 @@ from torch.autograd import Variable
 import torch.nn as nn
 import csv
 from NN import *
+import random
+
 
 dtype = torch.FloatTensor
+
 
 def open_file(path_to_filename, path_to_filename2, path_to_filename3):
     with open(path_to_filename) as csvfile:
@@ -41,29 +44,32 @@ def create_folds(X, k):
     return folds
 
 
-def train( fold, lr, iterations):
-    #forward_info = [('', 22), ('s', 8), ('t', 5), ('l', 3)]
-    net = Net()#(forward_info)
+def train(train_data, lr, iterations, layer_info):
+    """
+    Create neural netwerk and train it.
+    Input:
+        :param train_data
+        :param lr
+        :param iterations:
+        :layer_info
+    Output:
+        neural netwerk
+    """
+    net = NN(layer_info)
+
     # make data ready for use
-    train_data = fold[0]
     in_data = []
     out_data = []
-    #print("Error? dan werkt row[3:]+[0]*36 op regel 58 niet")
     for row in train_data:
-        #in_data.append(row[3:]+[0]*36)
-        # in_data.append(row[3:]+[200]*36)
-        # in_data.append(row[3:]+[0 for i in range(36)])
         in_data.append(row[3:])
         out_data.append(row[:3])
     train_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
     train_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
 
-    # try different loss functions
+    # define loss function: mean squared error
     loss_function = nn.MSELoss()
-    # nn.CrossEntropyLoss()
 
-    # try different weight optimizers
-    # for example: SGD, Nesterov-SGD, Adam, RMSProp, etc
+    # define optimize method: stochastic gradient descent
     optimizer = torch.optim.SGD(net.parameters(), lr=lr)
 
     for i in range(iterations):
@@ -82,64 +88,73 @@ def train( fold, lr, iterations):
         # update the weights
         optimizer.step()
 
+    return net
 
-    # find loss of test set
-    test_data = fold[1]
+
+def test(test_data, net):
+    """
+        Find loss of test set.
+    """
+    # make data ready for use
     in_data = []
     out_data = []
-    for row in train_data:
+    for row in test_data:
         in_data.append(row[3:])
         out_data.append(row[:3])
     test_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
     test_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
+
+    # calculate output
     test_output = net(test_input)
+
+    # define loss function: mean squared error
+    loss_function = nn.MSELoss()
+
+    # calculate the error
     test_loss = loss_function(test_output, test_target)
 
-    return net, test_loss.data[0]
+    return test_loss.data[0]
 
 
-"""
-parameters:
-path_to_filename
-path_to_filename2 (default is None)
-path_to_filename3 (default is None)
-lr: learning rate (default is 1e-17)
-iterations: number of iterations (non-zero integer)
-k: number of folds (non-zero integer)
-
-"""
-
-def main1(iterations, k, path_to_filename, path_to_filename2 = None, path_to_filename3  = None,  lr = 1e-17):
+def create_nn(iterations, layer_info, path_to_filename, path_to_filename2=None, path_to_filename3=None, k=None, lr=1e-17):
+    """
+    Create a neural netwerk.
+    Input:
+        :param iterations: number of iterations (non-zero integer)
+        :param k: number of folds (non-zero integer)
+        :param layer_info: list of integers where element is the number of nodes of corresponding layer
+        :param path_to_filename
+        :param path_to_filename2 (default is None)
+        :param path_to_filename3 (default is None)
+        :param lr: learning rate (default is 1e-17)
+    Output: neural netwerk
+    """
+    # create dataset from csv files
     X = open_file(path_to_filename, path_to_filename2, path_to_filename3)
-    folds = create_folds(X, k)
 
-    #best_net = None
-    #error = 10^40
-    #for fold in folds:
-    #    net, test_loss = train( fold, lr, iterations)
-    #    if error > test_loss:
-    #        error = test_loss
-    #        best_net = net
+    # not using k-fold cross validation
+    if k == None or k <= 1:
+        best_net = train(X, lr, iterations, layer_info)
 
-    # als het goed is werkt de k-fold cross validation nu wel
-    # als het toch niet werkt dan kan je het weer commenten en de volgende regel uncommenten:
-    best_net, _ = train( folds[0], lr, iterations)
+    # using k-fold cross validation
+    else:
+        folds = create_folds(X, k)
+        best_net = None
+        error = None
+        folds_prime = random.sample(folds, 2)
+        for fold in folds_prime:
+            net = train(fold[0], lr, iterations, layer_info)
+            test_loss = test(fold[1], net)
+            if error == None or error > test_loss:
+                error = test_loss
+                best_net = net
 
     return best_net
 
 
-"""
-Discussie punten zijn:
-- de random layers die worden gegenereerd in NN.py worden nu met [3,4,5,6,7,8] gegenereerd.. willen we de lijst uitbreiden?
-- soort loss_function (in train())
-- soort optimizer (in train())
-- k-fold wel of niet toepassen
-- lr aanpassen -> veel gebruikte techniek is: start with large, if training crit div, try 3 times smaller, etc until no diverges is observed
-
-"""
+# AANROEPEN MET:
+# create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv')
 
 
-#net = Net()
-
-#main(1000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv' )
-#print(net.parameters())
+# OF AANROEPEN MET k-fold cross validation: (hij zal maar met twee fold dingen doen)
+# create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv', k=20)

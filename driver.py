@@ -106,6 +106,8 @@ class Driver:
         if not command.gear:
             command.gear = carstate.gear or 1
 
+
+
     def steer(self, carstate, target_track_pos, command):
         steering_error = target_track_pos - carstate.distance_from_center
         command.steering = self.steering_ctrl.control(

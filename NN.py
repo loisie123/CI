@@ -1,11 +1,18 @@
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
-import random
 
+
+# verandereringen zijn
+## NN ipv Net
+## layer_info = list van aantal nodes per hidden layer
 
 class AttrProxy(object):
-    """Translates index lookups into attribute lookups."""
+
+    """
+        Translates index lookups into attribute lookups.
+    """
+
     def __init__(self, module, prefix):
         self.module = module
         self.prefix = prefix
@@ -13,18 +20,19 @@ class AttrProxy(object):
     def __getitem__(self, i):
         return getattr(self.module, self.prefix + str(i))
 
-class Net(nn.Module):
 
-    def __init__(self):
+class NN(nn.Module):
 
-        super(Net, self).__init__()
+    """
+        Foot forward neural network.
+    """
 
-        numbers = [3,4,5,6,7,8]
-        num_of_hidden_layers = random.choice(numbers)
-        layer_info = [22] # [58]
-        for i in range(num_of_hidden_layers):
-            layer_info.append(random.choice(numbers))
-        layer_info.append(3)
+    def __init__(self, layer_info):
+
+        super(NN, self).__init__()
+
+        if len(layer_info) < 3:
+            raise ValueError("layer_info not wel-defined: list with at least three integers expected")
 
         # create modules
         self.steps = len(layer_info)-1
