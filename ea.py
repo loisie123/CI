@@ -16,7 +16,7 @@ def makepopulation(generatie, parents_file = None):
             # this must be with Mirthes network
 
             net = Net()
-            main1(1000, 5, '/home/student/CI/train_data/aalborg.csv', path_to_filename2= '/home/student/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/CI/train_data/f-speedway.csv' )
+            main1(1000, 5, '/home/koen/Documents/ComputationalIntelligence/CI/train_data/aalborg.csv', path_to_filename2= '/home/koen/Documents/ComputationalIntelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '/home/koen/Documents/ComputationalIntelligence/CI/train_data/f-speedway.csv' )
 
             #make a network
             #net = Net(forward_info)
@@ -47,35 +47,31 @@ def selectParents(fitness = None):
 
     return index_beste, index_random
 
-
-
-def mutate(net):
+def mutate(net, first = False):
 
     ## INPUT: list of weights arrays of network, can be any number.
     ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network.
 
-    mutation = []
+    if first == True:
+        para = list(net.parameters()) # Unpack the parameters
+    else:
+        para = net # is already a normal list
 
-    mutation_indicator = np.random.choice(2, 1, p=[0, 1]) # mutation with probability of .2
-    para = list(net.parameters())
+    mutation_indicator = np.random.choice(2, 1, p=[0.8, 0.2]) # mutation with probability of .2
 
     if mutation_indicator == 1: # if mutate
-        mutation = []
-        for idx, mat in enumerate(list(net.parameters())):
+        print("MUTATION")
+        for idx, mat in enumerate(para):
             mat = mat.data.numpy()
-            np.random.permutation(mat)
+            mat = np.random.permutation(mat)
+            para[idx] = torch.nn.Parameter(torch.from_numpy(mat))
 
-            net.parameters()[idx] = torch.from_numpy(mat)
-            #print("Parameters:" , list(net.parameters())[0])
+        net = para
 
-
-        net.parameters = para
-
-        #print ("helloooo", para)    # shuffle array
-            #  # add shuffled matrix to list
         return net # return list of mutated weight matrices
 
     else: # if not mutate
+        net = para
         return net # return original network
 
 def breed(network1, network2):
@@ -85,26 +81,28 @@ def breed(network1, network2):
 
     # Child 1
     CH1 = []    # list to store child 1's weight matrices
-    for ind, mat in enumerate(list(net.parameters())):    # for every weight matrix
-        child1 = np.zeros((mat.shape[0], mat.shape[1])) # create zero matrix
+    for ind, mat in enumerate(network1):    # for every weight matrix
+        mat = mat.data.numpy()
         for idx, row in enumerate(mat): # for every row in current weight matrix
             selection_indicator = np.random.choice(2, 1, p=[.5, .5]) # choose parent (0 for parent 1, 1 for parent 2)
             if selection_indicator == 0:
-                child1[idx] = network1[ind][idx] # take row from parent 1
+                mat[idx] = network1[ind].data.numpy()[idx] # take row from parent 1
             else:
-                child1[idx] = network2[ind][idx] # take row from parent 2
+                mat[idx] = network2[ind].data.numpy()[idx] # take row from parent 2
+        child1 = torch.nn.Parameter(torch.from_numpy(mat))
         CH1.append(child1)
 
     # Child 2, same principle
     CH2 = []
     for ind, mat in enumerate(network1):
-        child2 = np.zeros((mat.shape[0], mat.shape[1]))
+        mat = mat.data.numpy()
         for idx, row in enumerate(mat):
             selection_indicator = np.random.choice(2, 1, p=[.5, .5]) # 0 for parent 1, 1 for parent 2
             if selection_indicator == 0:
-                child2[idx] = network1[ind][idx]
+                mat[idx] = network1[ind].data.numpy()[idx] # take row from parent 1
             else:
-                child2[idx] = network2[ind][idx]
+                mat[idx] = network2[ind].data.numpy()[idx] # take row from parent 2
+        child2 = torch.nn.Parameter(torch.from_numpy(mat))
         CH2.append(child2)
 
     return CH1, CH2
@@ -120,13 +118,22 @@ def selectSurvivors(fitness = None):
 
 
 
+
 net = Net()
 
 main1(1000, 5, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+
 params1 = list(net.parameters())
+params2 = mutate(net, first = True)
+params3 = mutate(params2)
 
+print("PARENT 1")
+print(params1)
+print("PARENT 2")
+print(params2)
 
-
-mutate(net)
-
-params2 = list(net.parameters())
+c1, c2 = breed(params1, params2)
+print("CHILD 1")
+print(c1)
+print("CHILD 2")
+print(c2)
