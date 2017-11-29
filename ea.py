@@ -11,7 +11,7 @@ def makepopulation(generatie, parents_file = None):
         lays = [1,2,3,4,5]
         nodes = [9,8,7,6,5]
         populations = {}
-        for j in range(1, 5):
+        for j in range(1, 6):
             pop = []
             for i in range(2):
                 layers = []
@@ -29,8 +29,8 @@ def makepopulation(generatie, parents_file = None):
     return populations
 
 populations = makepopulation(1)
-# for key,val in populations.items():
-#     print(key, val)
+for key,val in populations.items():
+     print(key, val)
 
 print(populations[1][0])
 
