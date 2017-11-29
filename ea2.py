@@ -33,9 +33,9 @@ def makepopulation(generatie, parents_file = None):
     return populations
 
 
-populations = makepopulation(1)
-for key,val in populations.items():
-     print(key, val)
+#populations = makepopulation(1)
+#for key,val in populations.items():
+#     print(key, val)
 
 #print(populations[1][0])
 

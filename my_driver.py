@@ -9,7 +9,7 @@ from pytocl.controller import CompositeController, ProportionalController, Integ
 from neural_try import *
 from NN import *
 from train import *
-from ea import *
+from ea2 import *
 import random
 
 
@@ -30,8 +30,8 @@ class MyDriver(Driver):
 
         #
         # make a population and choose a model:
-        #self.populations = makepopulation(1, parents_file ='/home/student/Documents/CI/CI/generatie1complete.pt')
-        self.populations = makepopulation(1)
+        self.populations = makepopulation(1, parents_file ='/home/student/Documents/CI/CI/children.pt')
+        #self.populations = makepopulation(1)
         #torch.save(self.population, 'generatie1.pt')
 
         #state aanmaken:
@@ -59,7 +59,7 @@ class MyDriver(Driver):
 
     def firstmodel(self, population, i):
         # takes the population dictionairy and returns species.
-        torch.save(population, 'generatie1complete.pt')
+        #torch.save(population, 'generatie1complete.pt')
         species = population[i]
         print(species)
         return species
@@ -105,9 +105,9 @@ class MyDriver(Driver):
 
         elif -2< carstate.speed_x< 2:
             command.gear = 1
-
+        #and  -50 < carstate.angle < 50
         #wissel van neurale netwerken:
-        if self.number_of_carstates > 500 and  -50 < carstate.angle < 50 :
+        if self.number_of_carstates == 200  :
             self.model_number += 1
             carstate.damage = 0
 
@@ -131,14 +131,15 @@ class MyDriver(Driver):
         if self.individu == (len(self.specie) - 1) and self.group == 5:
             #end is reached:
             print(" alle models have been evaluated")
-            self.EA(self.list_of_scores, self.population, self.group)
+            self.EA(self.list_of_scores, self.populations, self.group)
             self.on_shotdown()
         elif self.individu == (len(self.specie) - 1):
-            self.group += 1
+
             self.individu = 0
             print("next group first individual")
-            self.EA(self.list_of_scores, self.population, self.group)
+            self.EA(self.list_of_scores, self.populations, self.group)
             self.list_of_scores = []
+            self.group += 1
             return self.populations[self.group][self.individu]
             # all individuals of one group are evaluated.
         else:
@@ -152,13 +153,26 @@ class MyDriver(Driver):
         scores: the fitness score of each network
         population: the neural networks of one species.
         """
+        print(self.group)
+
+        if self.group == 1:
+            layer_info = [22,9,3]
+        elif self.group ==2:
+            layer_info  =[22,9,8,3]
+        elif self.group == 3:
+            layer_info   = [22,9,8,7,3]
+        elif self.group == 4:
+            layer_info = [22,9,8,7,6,3]
+        else:
+            layer_info = [22,9,8,7,6,5,3]
+        print("evaluate networks")
         fitness_scores = []
         netwerk_list = []
         for indx in range(len(scores)):
             fitness_scores.append(scores[indx][1])
             individu = scores[indx][0]
             netwerk_list.append(individu[1])
-        index_best, index_worst  = selectParents(self.list_of_scores)
+        index_best, index_worst  = selectParents(fitness_scores)
 
         # best networks.
         best = []
@@ -167,9 +181,9 @@ class MyDriver(Driver):
         worst = []
         for i in range(len(index_worst)):
             worst.append(mutate(netwerk_list[index_worst[i]]))
-
+        new_pop = []
         parents = best + worst
-
+        print("make children")
         for i in range(8):
             couple = random.sample(parents, 2)
             child1 = create_child(couple[0], couple[1], layer_info, 1)
@@ -177,8 +191,11 @@ class MyDriver(Driver):
             child2 = create_child(couple[0], couple[1], layer_info, 2)
             new_pop.append(child2)
 
-        new_pop.append(best[:5])
-
+        new_pop.append(best[0])
+        new_pop.append(best[1])
+        new_pop.append(best[2])
+        new_pop.append(best[3])
+        print("how many children do we have?", len(new_pop))
         self.new_population[group] = new_pop
 
 
