@@ -13,26 +13,27 @@ def makepopulation(generatie, parents_file = None):
         populations = {}
         for j in range(1, 6):
             pop = []
-            for i in range(2):
+            for i in range(20):
                 layers = []
                 layers.append(22)
                 for z in range(j):
                     layers.append(nodes[z])
                 layers.append(3)
                 net = NN(layers)
-                create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
-                #create_nn(1000, layers, '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
+                #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+                create_nn(1000, layers, '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
                 pop.append(net)
             populations[j] = pop
     else:
         populations = torch.load(parents_file)
     return populations
 
+
 populations = makepopulation(1)
 for key,val in populations.items():
      print(key, val)
 
-print(populations[1][0])
+#print(populations[1][0])
 
 def selectParents(fitness = None):
 
@@ -88,10 +89,10 @@ def mutate(net, first = False):
         return net # return original network
 
 
-net = NN([22, 5,3])
-create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+#net = NN([22, 5,3])
+#create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
 
-net = mutate(net)
+#net = mutate(net)
 
 
 
