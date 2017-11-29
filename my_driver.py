@@ -10,6 +10,7 @@ from neural_try import *
 from NN import *
 from train import *
 from ea import *
+import random
 
 
 class MyDriver(Driver):
@@ -42,7 +43,7 @@ class MyDriver(Driver):
         self.species = [1,2,3,4,5]
 
         self.group = self.species[0]
-
+        self.new_population = {}
         # taka a specie and a indivu of that specie
 
 
@@ -110,7 +111,7 @@ class MyDriver(Driver):
             self.model_number += 1
             carstate.damage = 0
 
-            self.list_of_scores.append(((self.group, self.individu), score))
+            self.list_of_scores.append(((self.group, self.net), score))
             self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
             print("Change the model:")
             print(self.list_of_scores)
@@ -130,11 +131,14 @@ class MyDriver(Driver):
         if self.individu == (len(self.specie) - 1) and self.group == 5:
             #end is reached:
             print(" alle models have been evaluated")
+            self.EA(self.list_of_scores, self.population, self.group)
             self.on_shotdown()
         elif self.individu == (len(self.specie) - 1):
             self.group += 1
             self.individu = 0
             print("next group first individual")
+            self.EA(self.list_of_scores, self.population, self.group)
+            self.list_of_scores = []
             return self.populations[self.group][self.individu]
             # all individuals of one group are evaluated.
         else:
@@ -142,6 +146,44 @@ class MyDriver(Driver):
             self.individu += 1
             print("next indiviudual")
             return self.populations[self.group][self.individu]
+
+    def EA(self, scores, population, group):
+        """
+        scores: the fitness score of each network
+        population: the neural networks of one species.
+        """
+        fitness_scores = []
+        netwerk_list = []
+        for indx in range(len(scores)):
+            fitness_scores.append(scores[indx][1])
+            individu = scores[indx][0]
+            netwerk_list.append(individu[1])
+        index_best, index_worst  = selectParents(self.list_of_scores)
+
+        # best networks.
+        best = []
+        for i in range(len(index_best)):
+            best.append(netwerk_list[index_best[i]])
+        worst = []
+        for i in range(len(index_worst)):
+            worst.append(mutate(netwerk_list[index_worst[i]]))
+
+        parents = best + worst
+
+        for i in range(8):
+            couple = random.sample(parents, 2)
+            child1 = create_child(couple[0], couple[1], layer_info, 1)
+            new_pop.append(child1)
+            child2 = create_child(couple[0], couple[1], layer_info, 2)
+            new_pop.append(child2)
+
+        new_pop.append(best[:5])
+
+        self.new_population[group] = new_pop
+
+
+
+
 
     def fitnesfunction(self, damage, afstandcenter,carstates, position):
         if self.model_number == 0:
@@ -170,32 +212,7 @@ class MyDriver(Driver):
         """
 
         print("ik wil opslaan")
-        torch.save(self.population, 'lijstvanparent.pt')
-        index_best, index_worst  = selectParents(self.list_of_scores)
-        print("index_best", index_best)
-        print("index_worst", index_worst)
-        best = []
-        #find out which networks are the best and worst
-        for i in range(len(index_best)):
-            best.append(self.population[index_best[i]])
-        worst = []
-        for i in range(len(index_worst)):
-            worst.append(self.population[index_worst[i]])
-
-        #mutate networks
-        for network in worst:
-            mutate(network.paramaters)
-
-        parents = best + worst
-
-        #randomly select parents
-        #chidl1, child2 = breead(parent1, parent2)
-        #child.appen(child1)
-        #child.append(child2)
-        #torch.save(parents, 'lijstvanparent.pt')
-        # save children.
-
-
+        torch.save(self.new_population, 'children.pt')
         print("ik wil weten wanneer ik aangeroepen word.s")
 
     # def drive(self, carstate: State) -> Command:
