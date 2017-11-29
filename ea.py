@@ -8,25 +8,31 @@ from train import *
 
 def makepopulation(generatie, parents_file = None):
     if parents_file == None:
-        pop = []
         lays = [1,2,3,4,5]
         nodes = [9,8,7,6,5]
-
+        populations = {}
         for j in range(1, 5):
-            for i in range(20):
+            pop = []
+            for i in range(2):
                 layers = []
                 layers.append(22)
                 for z in range(j):
                     layers.append(nodes[z])
                 layers.append(3)
                 net = NN(layers)
-                create_nn(1000, layers, '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
+                create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+                #create_nn(1000, layers, '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/aalborg.csv',path_to_filename2 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/alpine-1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
                 pop.append(net)
-
+            populations[j] = pop
     else:
-        pop = torch.load(parents_file)
-    return pop
+        populations = torch.load(parents_file)
+    return populations
 
+populations = makepopulation(1)
+# for key,val in populations.items():
+#     print(key, val)
+
+print(populations[1][0])
 
 def selectParents(fitness = None):
 

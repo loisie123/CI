@@ -29,21 +29,38 @@ class MyDriver(Driver):
 
         #
         # make a population and choose a model:
-        self.population = makepopulation(1 )
-        torch.save(self.population, 'generatie1.pt')
+        self.populations = makepopulation(1 )
+        #torch.save(self.population, 'generatie1.pt')
 
         #state aanmaken:
         self.begin_damage = 0.1
         self.begin_distance = 0.1
         self.start_carstate = 0.1
 
-        # maak eerste network
-        self.net = self.population[0]
+        #different kinds of neural networks
+        self.species = [1,2,3,4,5]
+
+        group = self.species[0]
+
+        # taka a specie and a indivu of that specie
+
+
+        self.specie = self.firstmodel(self.population, self.group)
+        self.individu = 0
+        self.net = self.specie[self.individu]
+
         # self.w1 = self.net[0]
         # self.w2 = self.net[1]
         self.model_number = 0
 
-        self.list_of_scores = []
+        self.list_of_scores = {}
+
+    def firstmodel(self, population, i):
+        # takes the population dictionairy and returns species.
+
+        species = population[i]
+        print(species)
+        return species
 
     def drive(self, carstate: State) -> Command:
         """
@@ -70,6 +87,7 @@ class MyDriver(Driver):
         command.brake = output.data[0,1]
         command.steering =  output.data[0,2]
         self.steer(carstate, 0.0, command)
+        self.accelerate(carstate, v_x, command)
 
 
         #Houdt bij hoeveel carstates er zijn geweest en bereken de score
@@ -77,52 +95,55 @@ class MyDriver(Driver):
         score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
 
         #als de auto stilstaat.
-        if 70 < carstate.angle < 120 and carstate.speed_x < 0.0:
+        if 70 < carstate.angle < 120 and  -1 < carstate.speed_x < 0.2:
             command.gear = -1
 
-
+        print("focus", command.focus)
         ACC_LATERAL_MAX = 6400 * 5
         v_x = min(100, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
 
         #wissel van neurale netwerken:
-        if self.number_of_carstates > 1000 and  -50 < carstate.angle < 50 :
-            self.list_of_scores.append(score)
-            self.changemodel(carstate.damage, carstate.distance_raced, self.number_of_carstates)
+        if self.number_of_carstates > 500 and  -50 < carstate.angle < 50 :
+            self.model_number += 1
+            carstate.damage = 0
+
+            self.list_of_scores.append((self.group, self.individu), score)
+            self.net = change_model()
             print("Change the model:")
             print(self.list_of_scores)
-            print(self.model_number)
 
-            #when last network is reached
-            if self.model_number + 1  == len(self.population):
-                self.on_shotdown()
 
-        #v_x = 150
-
-        self.accelerate(carstate, v_x, command)
-
-        if self.data_logger:
-            self.data_logger.log(carstate, command)
 
         return command
 
 
     def changemodel(self, damage, distance, states):
-        self.model_number += 1
-        self.number_of_carstates = 0
+        """
+        This function let the model change.
+        """
 
-        self.begin_damage = damage
+        self.number_of_carstates = 0
         self.begin_distance = distance- 0.001
         self.start_carstate = states
-        print("model_number=", self.model_number)
-        self.net = self.population[self.model_number]
-        # self.w1 = self.net[0]
-        # self.w2 = self.net[1]
+
+        if self.individu == (len(self.specie) - 1) and self.group == 5:
+            #end is reached:
+            self.on_shotdown()
+        elif self.individu == (len(self.specie) - 1):
+            self.group += 1
+            self.individu = 0
+            return self.population[self.group][self.individu]
+            # all individuals of one group are evaluated.
+        else:
+            # go to next individual
+            self.individu += 1
+            return self.population[self.group][self.individu]
 
     def fitnesfunction(self, damage, afstandcenter,carstates):
         if self.model_number == 0:
-            score = afstandcenter - damage
+            score = (afstandcenter - damage)
         else:
-            score = (afstandcenter - self.begin_distance) - (damage- self.begin_damage)
+            score = ((afstandcenter - self.begin_distance) - damage /carstate.race_position
         return score
 
     def create_ouput(self, input_line):
