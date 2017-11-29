@@ -29,7 +29,8 @@ class MyDriver(Driver):
 
         #
         # make a population and choose a model:
-        self.populations = makepopulation(1 )
+        #self.populations = makepopulation(1, parents_file ='/home/student/Documents/CI/CI/generatie1complete.pt')
+        self.populations = makepopulation(1)
         #torch.save(self.population, 'generatie1.pt')
 
         #state aanmaken:
@@ -40,12 +41,12 @@ class MyDriver(Driver):
         #different kinds of neural networks
         self.species = [1,2,3,4,5]
 
-        group = self.species[0]
+        self.group = self.species[0]
 
         # taka a specie and a indivu of that specie
 
 
-        self.specie = self.firstmodel(self.population, self.group)
+        self.specie = self.firstmodel(self.populations, self.group)
         self.individu = 0
         self.net = self.specie[self.individu]
 
@@ -53,11 +54,11 @@ class MyDriver(Driver):
         # self.w2 = self.net[1]
         self.model_number = 0
 
-        self.list_of_scores = {}
+        self.list_of_scores = []
 
     def firstmodel(self, population, i):
         # takes the population dictionairy and returns species.
-
+        torch.save(population, 'generatie1complete.pt')
         species = population[i]
         print(species)
         return species
@@ -87,32 +88,32 @@ class MyDriver(Driver):
         command.brake = output.data[0,1]
         command.steering =  output.data[0,2]
         self.steer(carstate, 0.0, command)
+        ACC_LATERAL_MAX = 6400 * 5
+        v_x = min(100, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+
         self.accelerate(carstate, v_x, command)
 
 
         #Houdt bij hoeveel carstates er zijn geweest en bereken de score
         self.number_of_carstates += 1
-        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates)
+        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
 
         #als de auto stilstaat.
-        if 70 < carstate.angle < 120 and  -1 < carstate.speed_x < 0.2:
+        if 80 < carstate.angle < 100 :
             command.gear = -1
 
-        print("focus", command.focus)
-        ACC_LATERAL_MAX = 6400 * 5
-        v_x = min(100, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+        elif -2< carstate.speed_x< 2:
+            command.gear = 1
 
         #wissel van neurale netwerken:
         if self.number_of_carstates > 500 and  -50 < carstate.angle < 50 :
             self.model_number += 1
             carstate.damage = 0
 
-            self.list_of_scores.append((self.group, self.individu), score)
-            self.net = change_model()
+            self.list_of_scores.append(((self.group, self.individu), score))
+            self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
             print("Change the model:")
             print(self.list_of_scores)
-
-
 
         return command
 
@@ -128,22 +129,25 @@ class MyDriver(Driver):
 
         if self.individu == (len(self.specie) - 1) and self.group == 5:
             #end is reached:
+            print(" alle models have been evaluated")
             self.on_shotdown()
         elif self.individu == (len(self.specie) - 1):
             self.group += 1
             self.individu = 0
-            return self.population[self.group][self.individu]
+            print("next group first individual")
+            return self.populations[self.group][self.individu]
             # all individuals of one group are evaluated.
         else:
             # go to next individual
             self.individu += 1
-            return self.population[self.group][self.individu]
+            print("next indiviudual")
+            return self.populations[self.group][self.individu]
 
-    def fitnesfunction(self, damage, afstandcenter,carstates):
+    def fitnesfunction(self, damage, afstandcenter,carstates, position):
         if self.model_number == 0:
             score = (afstandcenter - damage)
         else:
-            score = ((afstandcenter - self.begin_distance) - damage /carstate.race_position
+            score = (afstandcenter - self.begin_distance) - damage /position
         return score
 
     def create_ouput(self, input_line):
