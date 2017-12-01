@@ -19,7 +19,7 @@ def makepopulation(generatie, parents_file = None):
             pop = []
             for i in range(2):
                 layers = []
-                layers.append(22)
+                layers.append(58)
                 for z in range(j):
                     layers.append(nodes[z])
                 layers.append(3)

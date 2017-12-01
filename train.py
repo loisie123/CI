@@ -152,6 +152,11 @@ def create_nn(iterations, layer_info, path_to_filename, path_to_filename2=None, 
     return best_net
 
 
+
+
+
+
+
 # AANROEPEN MET:
 # create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv')
 
