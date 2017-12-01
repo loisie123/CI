@@ -1,160 +1,208 @@
-import torch
-from torch.autograd import Variable
-import torch.nn as nn
-import csv
-from NN import *
+from train import *
+from NN import*
 import random
 
-
-dtype = torch.FloatTensor
-
-
-def open_file(path_to_filename, path_to_filename2, path_to_filename3):
-    with open(path_to_filename) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-        X = []
-        for row in readCSV:
-            X.append(row)
-    if path_to_filename2 != None:
-        with open(path_to_filename2) as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-            for row in readCSV:
-                X.append(row)
-    if path_to_filename3 != None:
-        with open(path_to_filename3) as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-            for row in readCSV:
-                X.append(row)
-    return X
+import random
+import operator
+import numpy as np
+from NN import *
+from train import *
+# from neural_try import *
 
 
-def create_folds(X, k):
-    """
-    Create k folds of equal size for data set X.
-    X is a list and k is a non-zero integer.
-    """
-    N = len(X)
-    if k > N: k = N # set k to N if k if bigger than the size of data set
-    fold_size = round(N/k)
-    folds = []
-    for i in range(k):
-        train_set = X[:i*fold_size] + X[:(i+1)*fold_size]
-        test_set = X[i*fold_size:(i+1)*fold_size]
-        folds.append([train_set, test_set])
-    return folds
-
-
-def train(train_data, lr, iterations, layer_info):
-    """
-    Create neural netwerk and train it.
-    Input:
-        :param train_data
-        :param lr
-        :param iterations:
-        :layer_info
-    Output:
-        neural netwerk
-    """
-    net = NN(layer_info)
-
-    # make data ready for use
-    in_data = []
-    out_data = []
-    for row in train_data:
-        in_data.append(row[3:])
-        out_data.append(row[:3])
-    train_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
-    train_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
-
-    # define loss function: mean squared error
-    loss_function = nn.MSELoss()
-
-    # define optimize method: stochastic gradient descent
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr)
-
-    for i in range(iterations):
-        # zero gradient buffers
-        optimizer.zero_grad()
-
-        # find output of network
-        train_output = net(train_input)
-
-        # error of output and target
-        loss = loss_function(train_output, train_target)
-
-        # backpropagate the error
-        loss.backward()
-
-        # update the weights
-        optimizer.step()
-
-    return net
-
-
-def test(test_data, net):
-    """
-        Find loss of test set.
-    """
-    # make data ready for use
-    in_data = []
-    out_data = []
-    for row in test_data:
-        in_data.append(row[3:])
-        out_data.append(row[:3])
-    test_input = Variable(torch.FloatTensor(in_data).type(dtype), requires_grad=False)
-    test_target = Variable(torch.FloatTensor(out_data).type(dtype), requires_grad=False)
-
-    # calculate output
-    test_output = net(test_input)
-
-    # define loss function: mean squared error
-    loss_function = nn.MSELoss()
-
-    # calculate the error
-    test_loss = loss_function(test_output, test_target)
-
-    return test_loss.data[0]
-
-
-def create_nn(iterations, layer_info, path_to_filename, path_to_filename2=None, path_to_filename3=None, k=None, lr=1e-17):
-    """
-    Create a neural netwerk.
-    Input:
-        :param iterations: number of iterations (non-zero integer)
-        :param k: number of folds (non-zero integer)
-        :param layer_info: list of integers where element is the number of nodes of corresponding layer
-        :param path_to_filename
-        :param path_to_filename2 (default is None)
-        :param path_to_filename3 (default is None)
-        :param lr: learning rate (default is 1e-17)
-    Output: neural netwerk
-    """
-    # create dataset from csv files
-    X = open_file(path_to_filename, path_to_filename2, path_to_filename3)
-
-    # not using k-fold cross validation
-    if k == None or k <= 1:
-        best_net = train(X, lr, iterations, layer_info)
-
-    # using k-fold cross validation
+def makepopulation(generatie, parents_file = None):
+    if parents_file == None:
+        lays = [1,2,3,4,5]
+        nodes = [9,8,7,6,5]
+        populations = {}
+        for j in range(1, 6):
+            pop = []
+            for i in range(2):
+                layers = []
+                layers.append(22)
+                for z in range(j):
+                    layers.append(nodes[z])
+                layers.append(3)
+                net = NN(layers)
+                #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+                create_nn(1000, layers, '/home/student/data.csv',path_to_filename2 = '/home/student/data1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
+                pop.append(net)
+            populations[j] = pop
     else:
-        folds = create_folds(X, k)
-        best_net = None
-        error = None
-        folds_prime = random.sample(folds, 2)
-        for fold in folds_prime:
-            net = train(fold[0], lr, iterations, layer_info)
-            test_loss = test(fold[1], net)
-            if error == None or error > test_loss:
-                error = test_loss
-                best_net = net
-
-    return best_net
+        populations = torch.load(parents_file)
+    return populations
 
 
-# AANROEPEN MET:
-# create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv')
+#populations = makepopulation(1)
+#for key,val in populations.items():
+#     print(key, val)
+
+#print(populations[1][0])
+
+def selectParents(fitness = None):
+
+    ## INPUT: list of fitness values of networks
+    ## OUTPUT: index of 5 best networks in fitness-list, index of 3 random networks in fitness-list.
+
+    control = fitness[:] # clone fitness for getting index of random values later on
+
+    index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-5:] # Take 5 best
+
+    for index in sorted(index_beste, reverse=True): # delete them from the fitness set
+        del fitness[index]
+
+    random_selection = np.random.choice(fitness, 3, replace=False) # take 3 random from the remaining set
+    random_selection = list(random_selection)   # make it a list
+    index_random = []
+    for item in random_selection:
+        index_random.append(control.index(item))    # get the index
+
+    return index_beste, index_random
+
+def mutate(net, first = False):
+
+    ## INPUT: list of weights arrays of network, can be any number.
+    ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network
 
 
-# OF AANROEPEN MET k-fold cross validation: (hij zal maar met twee fold dingen doen)
-# create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine-1.csv', path_to_filename3 = '//Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/f-speedway.csv', k=20)
+    if first == True:
+        para = list(net.parameters()) # Unpack the parameters
+    else:
+        para = net # is already a normal list
+    params = []
+    mutation_indicator = np.random.choice(2, 1, p=[0, 1.0]) # mutation with probability of .2
+
+
+    print(list(net.parameters()))
+    if mutation_indicator == 1: # if mutate
+        for idx, mat in enumerate(list(net.parameters())):
+            mat = mat.data.cpu().numpy()
+            mat = np.random.permutation(mat)
+            params.append(torch.nn.Parameter(torch.from_numpy(mat)))
+
+
+            #net.register_parameter(params)
+
+        #list(net.parameters()) = para
+        #net = para
+
+        return net # return list of mutated weight matrices
+
+    else: # if not mutate
+        net = para
+        return net # return original network
+
+
+#net = NN([22, 5,3])
+#create_nn(1000, [22,5,3], '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+
+#net = mutate(net)
+
+
+
+
+
+
+def selectParents(fitness = None):
+
+    ## INPUT: list of fitness values of networks
+    ## OUTPUT: index of 5 best networks in fitness-list, index of 3 random networks in fitness-list.
+
+    control = fitness[:] # clone fitness for getting index of random values later on
+
+    index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-5:] # Take 5 best
+
+    for index in sorted(index_beste, reverse=True): # delete them from the fitness set
+        del fitness[index]
+
+    random_selection = np.random.choice(fitness, 3, replace=False) # take 3 random from the remaining set
+    random_selection = list(random_selection)   # make it a list
+    index_random = []
+    for item in random_selection:
+        index_random.append(control.index(item))    # get the index
+
+    return index_beste, index_random
+
+
+
+
+
+
+
+
+
+
+
+
+def create_child(parent1, parent2, layer_info, num_of_child):
+    """
+    Create a child model of two parent models.
+    Input:
+        :param parent1: torch.nn model
+        :param patent2: torch.nn model
+        :param layer_info: list with information of layers in model
+        :param num_of_child: 1 or 2
+    """
+    # create child model with weights of parent 1
+    child = NN(layer_info)
+    child.load_state_dict(parent1.state_dict())
+
+    # loop over weights of child
+    for k, weight in enumerate(child.parameters()):
+        p2_weight = list(parent2.parameters())[k]
+        size = weight.data.size()
+        # if weight is vector / bias
+        if len(size) == 1:
+            for i in range(size[0]):
+                # set child half of the weight values to weight values of parent 2
+                if num_of_child == 1 and i > size[0]/2:
+                    weight.data[i] = p2_weight.data[i]
+                elif num_of_child == 2 and i <= size[0]/2 :
+                    weight.data[i] = p2_weight.data[i]
+        # if weight is matrix
+        if len(size) == 2:
+            for i in range(size[0]):
+                for j in range(size[1]):
+                    # set child half of the weight values to weight values of parent 2
+                    if num_of_child == 1 and i > size[0]/2:
+                        weight.data[i,j] = p2_weight.data[i,j]
+                    elif num_of_child == 2 and i <= size[0]/2:
+                        weight.data[i,j] = p2_weight.data[i,j]
+    return child
+
+
+
+
+def mutate(model):
+    mutate = random.choice([True, False])
+    #print(mutate)
+    if mutate:
+        for weight in model.parameters():
+            size = weight.data.size()
+
+            # if weight is vector / bias
+            if len(size) == 1:
+                random_select = random.choice(range(round(size[0]/2)))
+                random_num1 = random.sample(range(size[0]), random_select)
+                random_num2 = random.sample(range(size[0]), random_select)
+                print(random_select)
+                for i in range(random_select):
+                    weight_temp = weight.data[random_num1[i]]
+                    weight.data[random_num1[i]] = weight.data[random_num2[i]]
+                    weight.data[random_num2[i]] = weight_temp
+
+            # if weight is matrix
+            if len(size) == 2:
+                indices = [(i,j) for i in range(3) for j in range(3)]
+                random_select = random.choice(range(round(len(indices)/2)))
+                print(random_select)
+                random_tup1 = random.sample(indices, random_select)
+                random_tup2 = random.sample(indices, random_select)
+                for k in range(random_select):
+                    (i1,j1), (i2,j2) = random_tup1[k], random_tup2[k]
+                    weight_temp = weight.data[i1,j1]
+                    weight.data[i1,j1] = weight.data[i2,j2]
+                    weight.data[i2,j2] = weight_temp
+
+    # is returnen nodig aangezien het een object is?
+    return model
