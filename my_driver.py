@@ -30,10 +30,9 @@ class MyDriver(Driver):
         #self.trainNetwork()
         self.number_of_carstates = 0
 
-        #
         # make a population and choose a model:
-        #self.populations = makepopulation(1, parents_file ='/home/student/eigendata.pt')
-        self.populations = makepopulation(1)
+        self.populations = makepopulation(1, parents_file ='/home/student/Documents/new/CI/eigendata.pt')
+        #self.populations = makepopulation(1)
         #torch.save(self.population, 'eigendata.pt')
 
         #state aanmaken:
@@ -61,7 +60,7 @@ class MyDriver(Driver):
 
     def firstmodel(self, population, i):
         # takes the population dictionairy and returns species.
-        torch.save(population, 'eigendata.pt')
+        #torch.save(population, 'eigendata.pt')
         species = population[i]
         print(species)
         return species
@@ -77,50 +76,64 @@ class MyDriver(Driver):
 
         #make a command.
         command = Command()
-
+        print(command)
         #make input_line
         input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
         for i in range(len(carstate.distances_from_edge)):
             input_line.append(carstate.distances_from_edge[i]   )
-
+        for i in range(len(carstate.opponents)):
+            input_line.append(carstate.opponents[i])
         # get output:
         output = self.create_ouput((input_line))
 
         #make new state
+        print(output.data[0,0])
+        command.accelerator = output.data[0,0]
 
-        command.accelarator = output.data[0,0]
         command.brake = output.data[0,1]
         command.steering =  output.data[0,2]
-
-        print (output)
+        self.accelerate(carstate ,command )
+        #print (output)
         #Houdt bij hoeveel carstates er zijn geweest en bereken de score
         self.number_of_carstates += 1
         score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
 
-
-
-
-
-        command.accelerator = acceleration
+        print("2", command.accelerator)
         #als de auto stilstaat.
-        if 80 < carstate.angle < 100 :
-            command.gear = -1
 
-        elif -2< carstate.speed_x< 2:
-            command.gear = 1
         #and  -50 < carstate.angle < 50
         #wissel van neurale netwerken:
+        print("3", command.accelerator)
         if self.number_of_carstates == 200  :
             self.model_number += 1
             carstate.damage = 0
-
             self.list_of_scores.append(((self.group, self.net), score))
             self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
-            print("Change the model:")
-            print(self.list_of_scores)
+        #v_x = 250
 
+
+        print("final"  , command.accelerator )
+        print (command)
         return command
 
+    def accelerate(self, carstate,  command):
+        # compensate engine deceleration, but invisible to controller to
+        # prevent braking:
+        #
+        # stabilize use of gas and brake:
+        #acceleration = math.pow(acceleration, 3)
+
+        if command.accelerator > 0 :
+            if abs(carstate.distance_from_center) >= 1:
+                # off track, reduced grip:
+                command.accelerator = min(0.4, command.accelerator)
+            command.gear = 1
+
+            if carstate.rpm > 8000:
+                command.gear = 2
+
+        # else:
+        #     command.brake = min(-acceleration, 1
 
     def changemodel(self, damage, distance, states):
         """
@@ -134,13 +147,13 @@ class MyDriver(Driver):
         if self.individu == (len(self.specie) - 1) and self.group == 5:
             #end is reached:
             print(" alle models have been evaluated")
-            self.EA(self.list_of_scores, self.populations, self.group)
+            #self.EA(self.list_of_scores, self.populations, self.group)
             self.on_shotdown()
         elif self.individu == (len(self.specie) - 1):
 
             self.individu = 0
             print("next group first individual")
-            self.EA(self.list_of_scores, self.populations, self.group)
+            #self.EA(self.list_of_scores, self.populations, self.group)
             self.list_of_scores = []
             self.group += 1
             return self.populations[self.group][self.individu]
@@ -159,15 +172,15 @@ class MyDriver(Driver):
         print(self.group)
 
         if self.group == 1:
-            layer_info = [22,9,3]
+            layer_info = [58,9,3]
         elif self.group ==2:
-            layer_info  =[22,9,8,3]
+            layer_info  =[58,9,8,3]
         elif self.group == 3:
-            layer_info   = [22,9,8,7,3]
+            layer_info   = [58,9,8,7,3]
         elif self.group == 4:
-            layer_info = [22,9,8,7,6,3]
+            layer_info = [58,9,8,7,6,3]
         else:
-            layer_info = [22,9,8,7,6,5,3]
+            layer_info = [58,9,8,7,6,5,3]
         print("evaluate networks")
         fitness_scores = []
         netwerk_list = []
@@ -218,7 +231,7 @@ class MyDriver(Driver):
         """
         tens = torch.FloatTensor(input_line)
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
-        ipt = y_variable.view(1, 22)
+        ipt = y_variable.view(1, 58)
 
         out = self.net(ipt)
         # y_pred = ipt.mm(self.w1)
@@ -234,45 +247,3 @@ class MyDriver(Driver):
         print("ik wil opslaan")
         torch.save(self.new_population, 'children.pt')
         print("ik wil weten wanneer ik aangeroepen word.s")
-
-    # def drive(self, carstate: State) -> Command:
-    #     """
-    #     Produces driving command in response to newly received car state.
-    #
-    #     This is a dummy driving routine, very dumb and not really considering a
-    #     lot of inputs. But it will get the car (if not disturbed by other
-    #     drivers) successfully driven along the race track.
-    #     """
-    #     command = Command()
-    #
-    #     command = Command()
-    #
-    #
-    #
-    #     self.steer(carstate, 0.0, command)
-    #     print("print hij iets")
-    #     ACC_LATERAL_MAX = 6400 * 5
-    #     v_x = min(200, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
-    #     v_x = 200
-    #
-    #     self.accelerate(carstate, v_x, command)
-    #
-    #     if self.data_logger:
-    #         self.data_logger.log(carstate, command)
-    #
-    #     #get a line to print the right statements to the carstate.
-    #     input_line = [self.accelerate(carstate, v_x, command),0 , self.steer(carstate, 0.0, command),carstate.speed_x,carstate.distance_from_center, carstate.angle]
-    #     for i in range(len(carstate.distances_from_edge)):
-    #         input_line.append(carstate.distances_from_edge[i])
-    #     for i in range(len(carstate.opponents)):
-    #         input_line.append(carstate.opponents[i])
-    #
-    #
-    #     return command
-    #
-    # def write_file(self, input_line):
-    #     files = open("testfile.txt","w")
-    #     files.write(input_line, "\n")
-    #     files.close()
-    #
-    #     #function that writes info in file

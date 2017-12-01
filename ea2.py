@@ -17,7 +17,7 @@ def makepopulation(generatie, parents_file = None):
         populations = {}
         for j in range(1, 6):
             pop = []
-            for i in range(2):
+            for i in range(5):
                 layers = []
                 layers.append(58)
                 for z in range(j):
@@ -25,7 +25,7 @@ def makepopulation(generatie, parents_file = None):
                 layers.append(3)
                 net = NN(layers)
                 #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
-                create_nn(1000, layers, '/home/student/data.csv',path_to_filename2 = '/home/student/data1.csv', path_to_filename3 = '/home/student/Documents/CI/CI/torcs-server/torcs-client/train_data/f-speedway.csv')
+                create_nn(1000, layers, '/home/student/data.csv', path_to_filename2 = '/home/student/data1.csv')
                 pop.append(net)
             populations[j] = pop
     else:
