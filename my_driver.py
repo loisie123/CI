@@ -21,6 +21,8 @@ class MyDriver(Driver):
             IntegrationController(0.2, integral_limit=1.5),
             DerivativeController(2)
         )
+        self.row = 0
+        self.file1 = open('data1.csv', 'a')
         self.acceleration_ctrl = CompositeController(
             ProportionalController(3.7),
         )
@@ -30,9 +32,9 @@ class MyDriver(Driver):
 
         #
         # make a population and choose a model:
-        self.populations = makepopulation(1, parents_file ='/home/student/Documents/CI/CI/children.pt')
-        #self.populations = makepopulation(1)
-        #torch.save(self.population, 'generatie1.pt')
+        #self.populations = makepopulation(1, parents_file ='/home/student/eigendata.pt')
+        self.populations = makepopulation(1)
+        #torch.save(self.population, 'eigendata.pt')
 
         #state aanmaken:
         self.begin_damage = 0.1
@@ -59,7 +61,7 @@ class MyDriver(Driver):
 
     def firstmodel(self, population, i):
         # takes the population dictionairy and returns species.
-        #torch.save(population, 'generatie1complete.pt')
+        torch.save(population, 'eigendata.pt')
         species = population[i]
         print(species)
         return species
@@ -85,20 +87,21 @@ class MyDriver(Driver):
         output = self.create_ouput((input_line))
 
         #make new state
+
         command.accelarator = output.data[0,0]
         command.brake = output.data[0,1]
         command.steering =  output.data[0,2]
-        self.steer(carstate, 0.0, command)
-        ACC_LATERAL_MAX = 6400 * 5
-        v_x = min(100, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
 
-        self.accelerate(carstate, v_x, command)
-
-
+        print (output)
         #Houdt bij hoeveel carstates er zijn geweest en bereken de score
         self.number_of_carstates += 1
         score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
 
+
+
+
+
+        command.accelerator = acceleration
         #als de auto stilstaat.
         if 80 < carstate.angle < 100 :
             command.gear = -1

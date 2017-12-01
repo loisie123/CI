@@ -1,5 +1,5 @@
 import logging
-
+import csv
 import math
 
 from pytocl.analysis import DataLogWriter
@@ -30,7 +30,8 @@ class Driver:
             ProportionalController(3.7),
         )
         self.data_logger = DataLogWriter() if logdata else None
-
+        self.file1 = open('data.csv', 'a')
+        self.row = 0
     @property
     def range_finder_angles(self):
         """Iterable of 19 fixed range finder directions [deg].
@@ -61,19 +62,36 @@ class Driver:
         lot of inputs. But it will get the car (if not disturbed by other
         drivers) successfully driven along the race track.
         """
+        self.row +=1
         command = Command()
         self.steer(carstate, 0.0, command)
 
-        # ACC_LATERAL_MAX = 6400 * 5
-        # v_x = min(80, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
-        v_x = 80
+        ACC_LATERAL_MAX = 6400 * 5
+        v_x = min(250, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
+        #v_x = 250
 
         self.accelerate(carstate, v_x, command)
-
         if self.data_logger:
             self.data_logger.log(carstate, command)
+        print ("versnelling" , command.accelerator)
+        print("rem", command.brake)
 
+        input_line = [command.accelerator, command.brake, command.steering, carstate.speed_x,carstate.distance_from_center, carstate.angle]
+        for i in range(len(carstate.distances_from_edge)):
+            input_line.append(carstate.distances_from_edge[i]   )
+        for j in range(len(carstate.opponents)):
+            input_line.append(carstate.opponents[j])
+        output = input_line
+        print(output)
+
+        self.makefile(output)
         return command
+
+    def makefile(self, output):
+        writer = csv.writer(self.file1)
+        writer.writerow(output)
+
+
 
     def accelerate(self, carstate, target_speed, command):
         # compensate engine deceleration, but invisible to controller to
@@ -105,8 +123,6 @@ class Driver:
 
         if not command.gear:
             command.gear = carstate.gear or 1
-
-
 
     def steer(self, carstate, target_track_pos, command):
         steering_error = target_track_pos - carstate.distance_from_center
