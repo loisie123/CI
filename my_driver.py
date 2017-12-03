@@ -31,9 +31,9 @@ class MyDriver(Driver):
         self.number_of_carstates = 0
 
         # make a population and choose a model:
-        self.populations = makepopulation(1, parents_file ='/home/student/Documents/new/CI/eigendata.pt')
+        self.populations = makepopulation(1, parents_file ='/home/student/Documents/new/CI/ouwedata.pt')
         #self.populations = makepopulation(1)
-        #torch.save(self.population, 'eigendata.pt')
+        #torch.save(self.population, 'ouwedata.pt')
 
         #state aanmaken:
         self.begin_damage = 0.1
@@ -55,12 +55,11 @@ class MyDriver(Driver):
         # self.w1 = self.net[0]
         # self.w2 = self.net[1]
         self.model_number = 0
-
         self.list_of_scores = []
 
     def firstmodel(self, population, i):
         # takes the population dictionairy and returns species.
-        #torch.save(population, 'eigendata.pt')
+        #torch.save(population, 'ouwedata.pt')
         species = population[i]
         print(species)
         return species
@@ -76,64 +75,55 @@ class MyDriver(Driver):
 
         #make a command.
         command = Command()
-        print(command)
         #make input_line
         input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
         for i in range(len(carstate.distances_from_edge)):
             input_line.append(carstate.distances_from_edge[i]   )
-        for i in range(len(carstate.opponents)):
-            input_line.append(carstate.opponents[i])
+    #    for i in range(len(carstate.opponents)):
+    #                                                                                               input_line.append(carstate.opponents[i])
         # get output:
         output = self.create_ouput((input_line))
 
         #make new state
-        print(output.data[0,0])
+
         command.accelerator = output.data[0,0]
 
         command.brake = output.data[0,1]
         command.steering =  output.data[0,2]
-        self.accelerate(carstate ,command )
-        #print (output)
-        #Houdt bij hoeveel carstates er zijn geweest en bereken de score
+        print("gear ", carstate.gear)
+        print("command", command.gear)
+        print("accelerator", command.accelerator)
+        print("brake", command.brake)
         self.number_of_carstates += 1
         score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
+        self.getGear(command.accelerator, carstate.rpm, carstate.gear, command)
 
-        print("2", command.accelerator)
         #als de auto stilstaat.
 
         #and  -50 < carstate.angle < 50
         #wissel van neurale netwerken:
-        print("3", command.accelerator)
+
         if self.number_of_carstates == 200  :
-            self.model_number += 1
-            carstate.damage = 0
-            self.list_of_scores.append(((self.group, self.net), score))
-            self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
+            self.on_shotdown(command)
+            #self.model_number += 1
+            #carstate.damage = 0
+            #self.list_of_scores.append(((self.group, self.net), score))
+            #self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
         #v_x = 250
 
-
-        print("final"  , command.accelerator )
-        print (command)
         return command
 
-    def accelerate(self, carstate,  command):
-        # compensate engine deceleration, but invisible to controller to
-        # prevent braking:
-        #
-        # stabilize use of gas and brake:
-        #acceleration = math.pow(acceleration, 3)
-
-        if command.accelerator > 0 :
-            if abs(carstate.distance_from_center) >= 1:
-                # off track, reduced grip:
-                command.accelerator = min(0.4, command.accelerator)
+    def getGear(self, accelerator, rpm, gear, command):
+        if gear == 0 and accelerator > 0:
             command.gear = 1
-
-            if carstate.rpm > 8000:
-                command.gear = 2
-
-        # else:
-        #     command.brake = min(-acceleration, 1
+        if gear > 0  and rpm > 8000:
+            command.gear += 1
+        if accelerator < 0 and gear > 0:
+            command.gear -= 1
+        elif accelerator < 0 and gear == 0:
+            command.gear = -1
+        elif accelerator < 0 and gear < 0 :
+            command.gear = 1
 
     def changemodel(self, damage, distance, states):
         """
@@ -172,15 +162,15 @@ class MyDriver(Driver):
         print(self.group)
 
         if self.group == 1:
-            layer_info = [58,9,3]
+            layer_info = [22,9,3]
         elif self.group ==2:
-            layer_info  =[58,9,8,3]
+            layer_info  =[22,9,8,3]
         elif self.group == 3:
-            layer_info   = [58,9,8,7,3]
+            layer_info   = [22,9,8,7,3]
         elif self.group == 4:
-            layer_info = [58,9,8,7,6,3]
+            layer_info = [22,9,8,7,6,3]
         else:
-            layer_info = [58,9,8,7,6,5,3]
+            layer_info = [22,9,8,7,6,5,3]
         print("evaluate networks")
         fitness_scores = []
         netwerk_list = []
@@ -214,10 +204,6 @@ class MyDriver(Driver):
         print("how many children do we have?", len(new_pop))
         self.new_population[group] = new_pop
 
-
-
-
-
     def fitnesfunction(self, damage, afstandcenter,carstates, position):
         if self.model_number == 0:
             score = (afstandcenter - damage)
@@ -231,7 +217,7 @@ class MyDriver(Driver):
         """
         tens = torch.FloatTensor(input_line)
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
-        ipt = y_variable.view(1, 58)
+        ipt = y_variable.view(1, 22)
 
         out = self.net(ipt)
         # y_pred = ipt.mm(self.w1)
@@ -239,11 +225,23 @@ class MyDriver(Driver):
         #output variables 0: acceleration  (has to be zero or 1)
         return out
 
-    def on_shotdown(self):
+    def on_restart(self):
+        if self.data_logger:
+            self.data_logger.close()
+            self.data_logger = None
+
+
+
+    def on_shotdown(self, command):
         """
         functions that is called when the server requested drive shutdown.
         """
 
         print("ik wil opslaan")
         torch.save(self.new_population, 'children.pt')
-        print("ik wil weten wanneer ik aangeroepen word.s")
+        command.meta = 1.0
+
+
+        if self.data_logger:
+            self.data_logger.close()
+            self.data_logger = None
