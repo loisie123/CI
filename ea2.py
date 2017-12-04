@@ -25,7 +25,7 @@ def makepopulation(generatie, parents_file = None):
                 layers.append(3)
                 net = NN(layers)
                 #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
-                create_nn(1000, layers, '/home/student/data.csv', path_to_filename2 = '/home/student/data1.csv')
+                create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/data.csv')
                 pop.append(net)
             populations[j] = pop
     else:

@@ -22,234 +22,280 @@ class MyDriver(Driver):
             IntegrationController(0.2, integral_limit=1.5),
             DerivativeController(2)
         )
-        self.row = 0
-        self.file1 = open('data2.csv', 'a')
+
+        # self.file1 = open('data2.csv', 'a')
         self.acceleration_ctrl = CompositeController(
             ProportionalController(3.7),
         )
         self.data_logger = DataLogWriter() if logdata else None
-        #self.trainNetwork()
+
+
+        #comment on of the two options below
+        #first time:
+        self.populations = makepopulation(1)
+        torch.save(self.populations, 'total_population.pt')
+        torch.save(self.populations[1], 'species_1.pt')
+        torch.save(self.populations[2], 'species_2.pt')
+        torch.save(self.populations[3], 'species_3.pt')
+        torch.save(self.populations[4], 'species_4.pt')
+        torch.save(self.populations[5], 'species_5.pt')
+
+
+        #group 1.
+
+        self.layer_info = [22,9,3]
+        self.population = torch.load('species_1.pt')
+        self.filename = 'species_1.pt'
+
+        # #group 2:
+        #
+        # self.layer_info  =[22,9,8,3]
+        # self.population = torch.load('species_2.pt')
+        # self.filename = 'species_2.pt'
+        #
+        # #group 3:
+        # self.layer_info  = [22,9,8,7,3]
+        #
+        # self.population = torch.load('species_3.pt')
+        # self.filename = 'species_3.pt'
+        #
+        # #group 4
+        # self.layer_info = [22,9,8,7,6,3]
+        # self.population = torch.load('species_4.pt')
+        # self.filename = 'species_4.pt'
+        #
+        # #group 5:
+        # layer_info = [22,9,8,7,6,5,3]
+        # self.population = torch.load('species_1.pt')
+        # self.filename = 'species_5.pt'
+
+        # when all these files exists:
+        self.net, self.population = self.getModel(self.population, self.filename)
+
+        #2. when there already a population file :
+        #self.populations = makepopulation(1, parents_file ='/home/student/Documents/new/CI/ouwedata.pt')
+
         self.number_of_carstates = 0
 
-        # make a population and choose a model:
-        self.populations = makepopulation(1, parents_file ='/home/student/Documents/new/CI/ouwedata.pt')
-        #self.populations = makepopulation(1)
-        #torch.save(self.population, 'ouwedata.pt')
 
-        #state aanmaken:
-        self.begin_damage = 0.1
-        self.begin_distance = 0.1
-        self.start_carstate = 0.1
+    def getModel(self, population, filename):
+        """
+        returns the selected netwerk for this drive and saves the new population
+        population: one of the species (1,2,3,4,5 hidden layers)
 
-        #different kinds of neural networks
-        self.species = [1,2,3,4,5]
+        """
 
-        self.group = self.species[0]
-        self.new_population = {}
-        # taka a specie and a indivu of that specie
+        print("getting the right network and popping the network")
+        net = population[0]
+        population.pop(0)
+        torch.save(population, filename)
+        return net, population
 
 
-        self.specie = self.firstmodel(self.populations, self.group)
-        self.individu = 0
-        self.net = self.specie[self.individu]
+    def drive(self, carstate: State) -> Command:
+        """
+        Produces driving command in response to newly received car state.
 
-        # self.w1 = self.net[0]
-        # self.w2 = self.net[1]
-        self.model_number = 0
-        self.list_of_scores = []
+        This is a dummy driving routine, very dumb and not really considering a
+        lot of inputs. But it will get the car (if not disturbed by other
+        drivers) successfully driven along the race track.
+        """
 
-    def firstmodel(self, population, i):
-        # takes the population dictionairy and returns species.
-        #torch.save(population, 'ouwedata.pt')
-        species = population[i]
-        print(species)
 
-        return species
+        #make a command.
+        command = Command()
 
-    # def drive(self, carstate: State) -> Command:
-    #     """
-    #     Produces driving command in response to newly received car state.
-    #
-    #     This is a dummy driving routine, very dumb and not really considering a
-    #     lot of inputs. But it will get the car (if not disturbed by other
-    #     drivers) successfully driven along the race track.
-    #     """
-    #
-    #     #make a command.
-    #     command = Command()
-    #     #make input_line
-    #     input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
-    #     for i in range(len(carstate.distances_from_edge)):
-    #         input_line.append(carstate.distances_from_edge[i]   )
-    # #    for i in range(len(carstate.opponents)):
-    # #                                                                                               input_line.append(carstate.opponents[i])
-    #     # get output:
-    #     output = self.create_ouput((input_line))
-    #     print(self.individu)
-    #     #make new state
-    #
-    #     command.accelerator = output.data[0,0]
-    #
-    #     command.brake = 0
-    #     command.steering =  output.data[0,2]
-    #     self.getGear(carstate, command)
-    #     print("gear ", carstate.gear)
-    #     print("command", command.gear)
-    #     print("accelerator", command.accelerator)
-    #     print("brake", command.brake)
-    #
-    #     self.number_of_carstates += 1
-    #     score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
-    #     #als de auto stilstaat.
-    #
-    #     #and  -50 < carstate.angle < 50
-    #     #wissel van neurale netwerken:
-    #
-    #     if self.number_of_carstates == 200  :
-    #         self.on_shotdown(command)
-    #
-    #
-    #         #self.model_number += 1
-    #         #carstate.damage = 0
-    #         #self.list_of_scores.append(((self.group, self.net), score))
-    #         #self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
-    #     #v_x = 250
-    #
-    #     return command
+        #make input_line.
+        input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
+        for i in range(len(carstate.distances_from_edge)):
+            input_line.append(carstate.distances_from_edge[i])
+        for i in range(len(carstate.opponents)):
+            input_line.append(carstate.opponents[i])
+
+        # get output:
+        output = self.create_ouput((input_line))
+
+        #make new state
+        command.accelerator = output.data[0,0]
+        command.brake = output.data[0,1]
+        command.steering =  output.data[0,2]
+        self.getGear(carstate, command)
+
+        #calculate score
+        self.number_of_carstates += 1
+        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, carstate.race_position)
+
+        # when a certain level of damage is done or when the car is not moving:
+        if self.number_of_carstates == 200:
+
+            #save changes:
+            self.saveModel(self.net, score)
+
+            # checks if last individu is examined:
+            if self.emptyList(self.population) == True:
+                parents = torch.load('parents_file_1.pt')
+                new_population = self.Evolutionair(parents, self.layer_info)
+
+                self.saveNew(new_population, self.filename)
+                print("next generation is comming")
+                self.on_shutdown(command)
+                # save it in the right file.
+
+            else: #when there are still neural networks available
+                self.on_shutdown(command)
+
+
+            #self.model_number += 1
+            #carstate.damage = 0
+            #self.list_of_scores.append(((self.group, self.net), score))
+            #self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
+        #v_x = 250
+
+        return command
 
     def getGear(self, carstate, command):
+        """
+        function that calculates which gear is neccesary.
+
+        carstate: the current carstate:
+        command: the new command.
+        """
+
         print("carstate rpm:", carstate.rpm)
-        if command.accelerator > 0.01 and carstate.rpm > 8000:
+        if command.accelerator > 0.03 and carstate.rpm > 8000:
             command.gear = carstate.gear + 1
             print("ga eens naar een hogere versnelling")
         elif command.accelerator < 0.3 and carstate.rpm < 2500:
             command.gear = carstate.gear - 1
             print("hij gaat weer door")
-        #elif carstate.speed_x == 0 and carstate.distance_raced > 10:
-        #    command.gear = -
         else:
             command.gear = carstate.gear
 
-    def changemodel(self, damage, distance, states):
+    def saveNew(self, children, filename):
+        #save the children in two, files
+        torch.save(children, filename)
+        torch.save(children, 'last_generation.pt')
+
+
+
+    def saveModel(self, net, fitnes):
         """
-        This function let the model change.
+        this function saves the current neural network
+
+        net: the current networ
+        fitnes: fitness score
         """
 
-        self.number_of_carstates = 0
-        self.begin_distance = distance- 0.001
-        self.start_carstate = states
-
-        if self.individu == (len(self.specie) - 1) and self.group == 5:
-            #end is reached:
-            print(" alle models have been evaluated")
-            #self.EA(self.list_of_scores, self.populations, self.group)
-            self.on_shotdown()
-        elif self.individu == (len(self.specie) - 1):
-
-            self.individu = 0
-            print("next group first individual")
-            #self.EA(self.list_of_scores, self.populations, self.group)
-            self.list_of_scores = []
-            self.group += 1
-            return self.populations[self.group][self.individu]
-            # all individuals of one group are evaluated.
+        my_file = Path('CI/parents_file_1.pt')
+        if my_file.is_file():  # this means a file exists
+            old_net = torch.load('parents_file_1.pt')
+            new_net = (net,fitnes)
+            old_net.append(new_net)
+            torch.save(old_net, 'parents_file_1.pt')
         else:
-            # go to next individual
-            self.individu += 1
-            print("next indiviudual")
-            return self.populations[self.group][self.individu]
+            # this is the first model that is analysed.
+            new_net = [(net,fitness)]
+            torch.save(new_net, 'parents_file_1.pt' )
 
-    def EA(self, scores, population, group):
+    def emptyList(self, population):
         """
-        scores: the fitness score of each network
+        function that checks if all the individuls of a certain population are examined.
+        population: list of individuals
+        """
+
+        if len(population) == 0:
+            return True
+        else:
+            return False
+
+
+
+    def Evolutionair(self, parents, layers):
+        """
+        function that returns children.
+
         population: the neural networks of one species.
+        layers: layer info that the current neural network has.
         """
-        print(self.group)
+        #make fitnes listst and parentslists
+        for net_parents in parents:
+            list_parents = net_parents[0]
+            list_fitnes = net_parents[1]
 
-        if self.group == 1:
-            layer_info = [22,9,3]
-        elif self.group ==2:
-            layer_info  =[22,9,8,3]
-        elif self.group == 3:
-            layer_info   = [22,9,8,7,3]
-        elif self.group == 4:
-            layer_info = [22,9,8,7,6,3]
-        else:
-            layer_info = [22,9,8,7,6,5,3]
-        print("evaluate networks")
-        fitness_scores = []
-        netwerk_list = []
-        for indx in range(len(scores)):
-            fitness_scores.append(scores[indx][1])
-            individu = scores[indx][0]
-            netwerk_list.append(individu[1])
-        index_best, index_worst  = selectParents(fitness_scores)
+        index_best, index_worst  = selectParents(list_fitnes)
 
         # best networks.
         best = []
         for i in range(len(index_best)):
-            best.append(netwerk_list[index_best[i]])
+            best.append(list_parents[index_best[i]])
         worst = []
+
+        #worst networks
         for i in range(len(index_worst)):
-            worst.append(mutate(netwerk_list[index_worst[i]]))
+            worst.append(mutate(list_parents[index_worst[i]]))
+
+        #new population is a list.
         new_pop = []
         parents = best + worst
-        print("make children")
+
+        print("make children ")
+
+        # it takes 2 parents (randomly) and makes to children of them
+        # so we have 16 children
         for i in range(8):
             couple = random.sample(parents, 2)
-            child1 = create_child(couple[0], couple[1], layer_info, 1)
+            child1 = create_child(couple[0], couple[1], layers, 1)
             new_pop.append(child1)
-            child2 = create_child(couple[0], couple[1], layer_info, 2)
+            child2 = create_child(couple[0], couple[1], layers, 2)
             new_pop.append(child2)
 
+        # we append the four best neural networks.
         new_pop.append(best[0])
         new_pop.append(best[1])
         new_pop.append(best[2])
         new_pop.append(best[3])
-        print("how many children do we have?", len(new_pop))
-        self.new_population[group] = new_pop
 
-    def fitnesfunction(self, damage, afstandcenter,carstates, position):
-        if self.model_number == 0:
-            score = (afstandcenter - damage)/position
-        else:
-            score = ((afstandcenter - self.begin_distance) - damage )/position
+        return new_pop
+
+
+    def fitnesfunction(self, damage, afstandcenter, position):
+        """
+        function that calculates the score of the network.
+        damage: the damage that is done on the car.
+        afstandcenter:  the distance the car has raced.
+        position: the position of the car.
+        """
+
+        score = (afstandcenter - damage)/position
         return score
 
     def create_ouput(self, input_line):
         """
         Function that creates output from an input_line
+        inputline: consists of speed_x, carstate_distance_from_center, all distances to edges
+                and all distances to opponents.
         """
         tens = torch.FloatTensor(input_line)
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
         ipt = y_variable.view(1, 22)
 
         out = self.net(ipt)
-        # y_pred = ipt.mm(self.w1)
-        # out = y_pred.mm(self.w2)
-        #output variables 0: acceleration  (has to be zero or 1)
         return out
 
     def on_restart(self):
+        """
+        function that makes the car restart the race.
+        """
 
         os.system("./torcs-server/torcs-client/start.sh")
-
         if self.data_logger:
             self.data_logger.close()
             self.data_logger = None
 
 
 
-    def on_shotdown(self, command):
+    def on_shutdown(self, command):
         """
         functions that is called when the server requested drive shutdown.
         """
-
-        print("ik wil opslaan")
-        torch.save(self.new_population, 'children.pt')
         command.meta = 1.0
-
-
-        if self.data_logger:
-            self.data_logger.close()
-            self.data_logger = None
