@@ -30,7 +30,7 @@ class Driver:
             ProportionalController(3.7),
         )
         self.data_logger = DataLogWriter() if logdata else None
-        self.file1 = open('data1.csv', 'a')
+        self.file1 = open('data2.csv', 'a')
         self.row = 0
     @property
     def range_finder_angles(self):
@@ -55,45 +55,56 @@ class Driver:
             self.data_logger = None
 
     def drive(self, carstate: State) -> Command:
-        # """
-        # Produces driving command in response to newly received car state.
-        #
-        # This is a dummy driving routine, very dumb and not really considering a
-        # v_x = min(250, math.sqrt(ACC_LATERAL_MAX / abs(command.steering)))
-        # lot of inputs. But it will get the car (if not disturbed by other
-        # drivers) successfully driven along the race track.
-        # """
-        # self.row +=1
-        # command = Command()
-        # self.steer(carstate, 0.0, command)
-        #
-        # ACC_LATERAL_MAX = 6400 * 5
-        # v_x = 100
-        #
-        # self.acceleration(carstate, v_x, command)
-        # if self.data_logger:
-        #     self.data_logger.log(carstate, command)
-        # print ("versnelling" , command.accelerator)
-        # print("rem", command.brake)
-        #
-        # input_line = [command.accelerator, command.brake, command.steering, carstate.speed_x,carstate.distance_from_center, carstate.angle]
-        # for i in range(len(carstate.distances_from_edge)):
-        #     input_line.append(carstate.distances_from_edge[i]   )
-        # for j in range(len(carstate.opponents)):
-        #     input_line.append(carstate.opponents[j])
-        # output = input_line
-        # print(output)
-        #
-        # self.makefile(output)
+        """
+        Produces driving command in response to newly received car state.
+
+        This is a dummy driving routine, very dumb and not really considering a
+        lot of inputs. But it will get the car (if not disturbed by other
+        drivers) successfully driven along the race track.
+        """
+        command = Command()
+        self.steer(carstate, 0.0, command)
+
+        #ACC_LATERAL_MAX = 6400 * 5
+        v_x = 250
+
+        self.accelerate(carstate, v_x, command)
+        if self.data_logger:
+            self.data_logger.log(carstate, command)
+
+
+
+        #command.gear =1
+        # extra toegevoegd
+        input_line = [command.accelerator, command.brake, command.steering, carstate.speed_x,carstate.distance_from_center, carstate.angle]
+        for i in range(len(carstate.distances_from_edge)):
+             input_line.append(carstate.distances_from_edge[i]   )
+        for j in range(len(carstate.opponents)):
+             input_line.append(carstate.opponents[j])
+        output = input_line
+
+
+
+
+        self.makefile(output)
+
+
+
+
+
         return command
 
     def makefile(self, output):
+        print("jippie")
         writer = csv.writer(self.file1)
         writer.writerow(output)
 
+    def on_restart(self):
+        if self.data_logger:
+            self.data_logger.close()
+            self.data_logger = None
 
-
-    def acceleration(self, carstate, target_speed, command):
+    def accelerate(self, carstate, target_speed, command):
         # compensate engine deceleration, but invisible to controller to
         # prevent braking:
         speed_error = 1.0025 * target_speed * MPS_PER_KMH - carstate.speed_x
@@ -101,7 +112,7 @@ class Driver:
             speed_error,
             carstate.current_lap_time
         )
-        print("acceleration", acceleration)
+        #print("acceleration", acceleration)
         # stabilize use of gas and brake:
         acceleration = math.pow(acceleration, 3)
 
@@ -115,8 +126,8 @@ class Driver:
             if carstate.rpm > 8000:
                 command.gear = carstate.gear + 1
 
-        # else:
-        #     command.brake = min(-acceleration, 1)
+        else:
+             command.brake = min(-acceleration, 1)
 
         if carstate.rpm < 2500:
             command.gear = carstate.gear - 1

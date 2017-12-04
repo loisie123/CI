@@ -11,6 +11,7 @@ from NN import *
 from train import *
 from ea2 import *
 import random
+import os
 
 
 class MyDriver(Driver):
@@ -22,7 +23,7 @@ class MyDriver(Driver):
             DerivativeController(2)
         )
         self.row = 0
-        self.file1 = open('data1.csv', 'a')
+        self.file1 = open('data2.csv', 'a')
         self.acceleration_ctrl = CompositeController(
             ProportionalController(3.7),
         )
@@ -62,6 +63,7 @@ class MyDriver(Driver):
         #torch.save(population, 'ouwedata.pt')
         species = population[i]
         print(species)
+
         return species
 
     # def drive(self, carstate: State) -> Command:
@@ -83,21 +85,21 @@ class MyDriver(Driver):
     # #                                                                                               input_line.append(carstate.opponents[i])
     #     # get output:
     #     output = self.create_ouput((input_line))
-    #
+    #     print(self.individu)
     #     #make new state
     #
     #     command.accelerator = output.data[0,0]
     #
-    #     command.brake = output.data[0,1]
+    #     command.brake = 0
     #     command.steering =  output.data[0,2]
+    #     self.getGear(carstate, command)
     #     print("gear ", carstate.gear)
     #     print("command", command.gear)
     #     print("accelerator", command.accelerator)
     #     print("brake", command.brake)
+    #
     #     self.number_of_carstates += 1
     #     score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
-    #     self.getGear(command.accelerator, carstate.rpm, carstate.gear, command)
-    #
     #     #als de auto stilstaat.
     #
     #     #and  -50 < carstate.angle < 50
@@ -105,25 +107,28 @@ class MyDriver(Driver):
     #
     #     if self.number_of_carstates == 200  :
     #         self.on_shotdown(command)
+    #
+    #
     #         #self.model_number += 1
     #         #carstate.damage = 0
     #         #self.list_of_scores.append(((self.group, self.net), score))
     #         #self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
     #     #v_x = 250
+    #
+    #     return command
 
-        return command
-
-    def getGear(self, accelerator, rpm, gear, command):
-        if gear == 0 and accelerator > 0:
-            command.gear = 1
-        if gear > 0  and rpm > 8000:
-            command.gear += 1
-        if accelerator < 0 and gear > 0:
-            command.gear -= 1
-        elif accelerator < 0 and gear == 0:
-            command.gear = -1
-        elif accelerator < 0 and gear < 0 :
-            command.gear = 1
+    def getGear(self, carstate, command):
+        print("carstate rpm:", carstate.rpm)
+        if command.accelerator > 0.01 and carstate.rpm > 8000:
+            command.gear = carstate.gear + 1
+            print("ga eens naar een hogere versnelling")
+        elif command.accelerator < 0.3 and carstate.rpm < 2500:
+            command.gear = carstate.gear - 1
+            print("hij gaat weer door")
+        #elif carstate.speed_x == 0 and carstate.distance_raced > 10:
+        #    command.gear = -
+        else:
+            command.gear = carstate.gear
 
     def changemodel(self, damage, distance, states):
         """
@@ -206,9 +211,9 @@ class MyDriver(Driver):
 
     def fitnesfunction(self, damage, afstandcenter,carstates, position):
         if self.model_number == 0:
-            score = (afstandcenter - damage)
+            score = (afstandcenter - damage)/position
         else:
-            score = (afstandcenter - self.begin_distance) - damage /position
+            score = ((afstandcenter - self.begin_distance) - damage )/position
         return score
 
     def create_ouput(self, input_line):
@@ -226,13 +231,16 @@ class MyDriver(Driver):
         return out
 
     def on_restart(self):
+
+        os.system("./torcs-server/torcs-client/start.sh")
+
         if self.data_logger:
             self.data_logger.close()
             self.data_logger = None
 
 
 
-    def on_shutdown(self, command):
+    def on_shotdown(self, command):
         """
         functions that is called when the server requested drive shutdown.
         """
