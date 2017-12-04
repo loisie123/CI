@@ -49,7 +49,7 @@ if len(populations) == 0:
    print("kinderen worden nu in species_1 gezet")
    children = torch.load('children_trying.pt')
    torch.save(children, 'species_1.pt')
-   # make children en sla deze op 
+   # make children en sla deze op
 else:
     print("tijd voor volgende netwerk dan ")
     print("ik ga nu restarten")

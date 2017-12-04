@@ -12,6 +12,8 @@ from train import *
 from ea2 import *
 import random
 import os
+from pathlib import Path
+
 
 
 class MyDriver(Driver):
@@ -32,38 +34,37 @@ class MyDriver(Driver):
 
         #comment on of the two options below
         #first time:
-        self.populations = makepopulation(1)
-        torch.save(self.populations, 'total_population.pt')
-        torch.save(self.populations[1], 'species_1.pt')
-        torch.save(self.populations[2], 'species_2.pt')
-        torch.save(self.populations[3], 'species_3.pt')
-        torch.save(self.populations[4], 'species_4.pt')
-        torch.save(self.populations[5], 'species_5.pt')
-
+        # self.populations = makepopulation(1)
+        # torch.save(self.populations, 'total_population.pt')
+        # torch.save(self.populations[1], 'species_1.pt')
+        # torch.save(self.populations[2], 'species_2.pt')
+        # torch.save(self.populations[3], 'species_3.pt')
+        # torch.save(self.populations[4], 'species_4.pt')
+        # torch.save(self.populations[5], 'species_5.pt')
+        #
 
         #group 1.
-
-        self.layer_info = [22,9,3]
-        self.population = torch.load('species_1.pt')
-        self.filename = 'species_1.pt'
-
+        #
+        # self.layer_info = [22,9,3]
+        # self.population = torch.load('/home/student/Documents/new/CI/species_1.pt')
+        # self.filename = '/home/student/Documents/new/CI/species_1.pt'
+        #
         # #group 2:
-        #
+
         # self.layer_info  =[22,9,8,3]
-        # self.population = torch.load('species_2.pt')
-        # self.filename = 'species_2.pt'
-        #
+        # self.population = torch.load('/home/student/Documents/new/CI/species_2.pt')
+        # self.filename = '/home/student/Documents/new/CI/species_2.pt'
+
         # #group 3:
         # self.layer_info  = [22,9,8,7,3]
-        #
-        # self.population = torch.load('species_3.pt')
-        # self.filename = 'species_3.pt'
-        #
+        # self.population = torch.load('/home/student/Documents/new/CI/species_3.pt')
+        # self.filename = '/home/student/Documents/new/CI/species_3.pt'
+
         # #group 4
-        # self.layer_info = [22,9,8,7,6,3]
-        # self.population = torch.load('species_4.pt')
-        # self.filename = 'species_4.pt'
-        #
+        self.layer_info = [22,9,8,7,6,3]
+        self.population = torch.load('/home/student/Documents/new/CI/species_4.pt')
+        self.filename = '/home/student/Documents/new/CI/species_4.pt'
+
         # #group 5:
         # layer_info = [22,9,8,7,6,5,3]
         # self.population = torch.load('species_1.pt')
@@ -109,8 +110,8 @@ class MyDriver(Driver):
         input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
         for i in range(len(carstate.distances_from_edge)):
             input_line.append(carstate.distances_from_edge[i])
-        for i in range(len(carstate.opponents)):
-            input_line.append(carstate.opponents[i])
+        #for i in range(len(carstate.opponents)):
+        #    input_line.append(carstate.opponents[i])
 
         # get output:
         output = self.create_ouput((input_line))
@@ -123,7 +124,8 @@ class MyDriver(Driver):
 
         #calculate score
         self.number_of_carstates += 1
-        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, carstate.race_position)
+        # score = self.fitnesfunction(carstate.damage, carstate.distance_raced, carstate.race_position)
+        score = self.fitnesfunction(carstate.damage, self.number_of_carstates, carstate.race_position)
 
         # when a certain level of damage is done or when the car is not moving:
         if self.number_of_carstates == 200:
@@ -133,7 +135,9 @@ class MyDriver(Driver):
 
             # checks if last individu is examined:
             if self.emptyList(self.population) == True:
-                parents = torch.load('parents_file_1.pt')
+                print("lijst is leeeg")
+                parents = torch.load('parents_file_4.pt')
+                print("parents:", parents)
                 new_population = self.Evolutionair(parents, self.layer_info)
 
                 self.saveNew(new_population, self.filename)
@@ -161,13 +165,13 @@ class MyDriver(Driver):
         command: the new command.
         """
 
-        print("carstate rpm:", carstate.rpm)
+        #print("carstate rpm:", carstate.rpm)
         if command.accelerator > 0.03 and carstate.rpm > 8000:
             command.gear = carstate.gear + 1
-            print("ga eens naar een hogere versnelling")
+            #print("ga eens naar een hogere versnelling")
         elif command.accelerator < 0.3 and carstate.rpm < 2500:
             command.gear = carstate.gear - 1
-            print("hij gaat weer door")
+            #print("hij gaat weer door")
         else:
             command.gear = carstate.gear
 
@@ -175,6 +179,7 @@ class MyDriver(Driver):
         #save the children in two, files
         torch.save(children, filename)
         torch.save(children, 'last_generation.pt')
+        os.remove('parents_file_2.pt')
 
 
 
@@ -186,23 +191,23 @@ class MyDriver(Driver):
         fitnes: fitness score
         """
 
-        my_file = Path('CI/parents_file_1.pt')
+        my_file = Path('parents_file_4.pt')
         if my_file.is_file():  # this means a file exists
-            old_net = torch.load('parents_file_1.pt')
+            old_net = torch.load('parents_file_4.pt')
             new_net = (net,fitnes)
             old_net.append(new_net)
-            torch.save(old_net, 'parents_file_1.pt')
+            torch.save(old_net, 'parents_file_4.pt')
         else:
             # this is the first model that is analysed.
-            new_net = [(net,fitness)]
-            torch.save(new_net, 'parents_file_1.pt' )
+            new_net = [(net,fitnes)]
+            torch.save(new_net, 'parents_file_4.pt' )
 
     def emptyList(self, population):
         """
         function that checks if all the individuls of a certain population are examined.
         population: list of individuals
         """
-
+        print(len(population))
         if len(population) == 0:
             return True
         else:
@@ -222,6 +227,7 @@ class MyDriver(Driver):
             list_parents = net_parents[0]
             list_fitnes = net_parents[1]
 
+        print("fitnes functions", list_fitnes)
         index_best, index_worst  = selectParents(list_fitnes)
 
         # best networks.
@@ -266,7 +272,7 @@ class MyDriver(Driver):
         position: the position of the car.
         """
 
-        score = (afstandcenter - damage)/position
+        score = (afstandcenter - damage)
         return score
 
     def create_ouput(self, input_line):
