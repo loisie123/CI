@@ -64,52 +64,52 @@ class MyDriver(Driver):
         print(species)
         return species
 
-    def drive(self, carstate: State) -> Command:
-        """
-        Produces driving command in response to newly received car state.
-
-        This is a dummy driving routine, very dumb and not really considering a
-        lot of inputs. But it will get the car (if not disturbed by other
-        drivers) successfully driven along the race track.
-        """
-
-        #make a command.
-        command = Command()
-        #make input_line
-        input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
-        for i in range(len(carstate.distances_from_edge)):
-            input_line.append(carstate.distances_from_edge[i]   )
-    #    for i in range(len(carstate.opponents)):
-    #                                                                                               input_line.append(carstate.opponents[i])
-        # get output:
-        output = self.create_ouput((input_line))
-
-        #make new state
-
-        command.accelerator = output.data[0,0]
-
-        command.brake = output.data[0,1]
-        command.steering =  output.data[0,2]
-        print("gear ", carstate.gear)
-        print("command", command.gear)
-        print("accelerator", command.accelerator)
-        print("brake", command.brake)
-        self.number_of_carstates += 1
-        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
-        self.getGear(command.accelerator, carstate.rpm, carstate.gear, command)
-
-        #als de auto stilstaat.
-
-        #and  -50 < carstate.angle < 50
-        #wissel van neurale netwerken:
-
-        if self.number_of_carstates == 200  :
-            self.on_shotdown(command)
-            #self.model_number += 1
-            #carstate.damage = 0
-            #self.list_of_scores.append(((self.group, self.net), score))
-            #self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
-        #v_x = 250
+    # def drive(self, carstate: State) -> Command:
+    #     """
+    #     Produces driving command in response to newly received car state.
+    #
+    #     This is a dummy driving routine, very dumb and not really considering a
+    #     lot of inputs. But it will get the car (if not disturbed by other
+    #     drivers) successfully driven along the race track.
+    #     """
+    #
+    #     #make a command.
+    #     command = Command()
+    #     #make input_line
+    #     input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
+    #     for i in range(len(carstate.distances_from_edge)):
+    #         input_line.append(carstate.distances_from_edge[i]   )
+    # #    for i in range(len(carstate.opponents)):
+    # #                                                                                               input_line.append(carstate.opponents[i])
+    #     # get output:
+    #     output = self.create_ouput((input_line))
+    #
+    #     #make new state
+    #
+    #     command.accelerator = output.data[0,0]
+    #
+    #     command.brake = output.data[0,1]
+    #     command.steering =  output.data[0,2]
+    #     print("gear ", carstate.gear)
+    #     print("command", command.gear)
+    #     print("accelerator", command.accelerator)
+    #     print("brake", command.brake)
+    #     self.number_of_carstates += 1
+    #     score = self.fitnesfunction(carstate.damage, carstate.distance_raced, self.number_of_carstates, carstate.race_position)
+    #     self.getGear(command.accelerator, carstate.rpm, carstate.gear, command)
+    #
+    #     #als de auto stilstaat.
+    #
+    #     #and  -50 < carstate.angle < 50
+    #     #wissel van neurale netwerken:
+    #
+    #     if self.number_of_carstates == 200  :
+    #         self.on_shotdown(command)
+    #         #self.model_number += 1
+    #         #carstate.damage = 0
+    #         #self.list_of_scores.append(((self.group, self.net), score))
+    #         #self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
+    #     #v_x = 250
 
         return command
 
@@ -232,7 +232,7 @@ class MyDriver(Driver):
 
 
 
-    def on_shotdown(self, command):
+    def on_shutdown(self, command):
         """
         functions that is called when the server requested drive shutdown.
         """
