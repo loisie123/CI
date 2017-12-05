@@ -9,28 +9,57 @@ from NN import *
 from train import *
 # from neural_try import *
 
-
-def makepopulation(generatie, parents_file = None):
+def makepopulation(parents_file = None):
     if parents_file == None:
-        lays = [1,2,3,4,5]
-        nodes = [9,8,7,6,5]
+        layer_info = [[58, 27, 36, 24, 3]]
+        iterations = 1000
+        lr = 45*10**-7
         populations = {}
-        for j in range(1, 6):
-            pop = []
+        for elem in layer_info:
             for i in range(20):
-                layers = []
-                layers.append(22)
-                for z in range(j):
-                    layers.append(nodes[z])
-                layers.append(3)
-                net = NN(layers)
-                #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
-                create_nn(1000, layers, '/home/student/Documents/new/CI/train_data/aalborg.csv')
-                pop.append(net)
-            populations[j] = pop
+                print(i)
+                family = []
+                net = create_nn(iterations, elem, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/own_races.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine_own.csv', path_to_filename3 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/multiple_Races.csv', lr = lr)
+                family.append(net)
+                populations[i] = family
     else:
         populations = torch.load(parents_file)
     return populations
+
+ #[58, 39, 21, 6, 24, 3], [58, 33, 9, 15, 30, 6, 3], [58, 36, 42, 15, 24, 39, 18, 9, 3], [58, 36, 9, 6, 21, 15, 12, 27, 42, 3]
+
+populations = makepopulation()
+torch.save(populations, 'species_1.pt')
+#torch.save(populations[1], 'species_1.pt')
+#torch.save(populations[2], 'species_2.pt')
+#torch.save(populations[3], 'species_3.pt')
+#torch.save(populations[4], 'species_4.pt')
+#torch.save(populations[5], 'species_5.pt')
+
+species_1 = torch.load('species_1.pt')
+print(species_1[0])
+#
+# def makepopulation(generatie, parents_file = None):
+#     if parents_file == None:
+#         lays = [1,2,3,4,5]
+#         nodes = [9,8,7,6,5]
+#         populations = {}
+#         for j in range(1, 6):
+#             pop = []
+#             for i in range(20):
+#                 layers = []
+#                 layers.append(22)
+#                 for z in range(j):
+#                     layers.append(nodes[z])
+#                 layers.append(3)
+#                 net = NN(layers)
+#                 #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
+#                 create_nn(1000, layers, '/home/student/Documents/new/CI/train_data/aalborg.csv')
+#                 pop.append(net)
+#             populations[j] = pop
+#     else:
+#         populations = torch.load(parents_file)
+#     return populations
 
 
 #populations = makepopulation(1)
