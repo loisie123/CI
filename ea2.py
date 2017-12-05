@@ -17,15 +17,15 @@ def makepopulation(generatie, parents_file = None):
         populations = {}
         for j in range(1, 6):
             pop = []
-            for i in range(5):
+            for i in range(20):
                 layers = []
-                layers.append(58)
+                layers.append(22)
                 for z in range(j):
                     layers.append(nodes[z])
                 layers.append(3)
                 net = NN(layers)
                 #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
-                create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/data.csv')
+                create_nn(1000, layers, '/home/student/Documents/new/CI/train_data/aalborg.csv')
                 pop.append(net)
             populations[j] = pop
     else:
@@ -39,58 +39,27 @@ def makepopulation(generatie, parents_file = None):
 
 #print(populations[1][0])
 
-def selectParents(fitness = None):
-
-    ## INPUT: list of fitness values of networks
-    ## OUTPUT: index of 5 best networks in fitness-list, index of 3 random networks in fitness-list.
-
-    control = fitness[:] # clone fitness for getting index of random values later on
-
-    index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-5:] # Take 5 best
-
-    for index in sorted(index_beste, reverse=True): # delete them from the fitness set
-        del fitness[index]
-
-    random_selection = np.random.choice(fitness, 3, replace=False) # take 3 random from the remaining set
-    random_selection = list(random_selection)   # make it a list
-    index_random = []
-    for item in random_selection:
-        index_random.append(control.index(item))    # get the index
-
-    return index_beste, index_random
-
-def mutate(net, first = False):
-
-    ## INPUT: list of weights arrays of network, can be any number.
-    ## OUTPUT: list of weights arrays (mutated with probability .2) of mutated network
+# def selectParents(fitness = None):
+#
+#     ## INPUT: list of fitness values of networks
+#     ## OUTPUT: index of 5 best networks in fitness-list, index of 3 random networks in fitness-list.
+#
+#     control = fitness.clone() # clone fitness for getting index of random values later on
+#
+#     index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-5:] # Take 5 best
+#
+#     for index in sorted(index_beste, reverse=True): # delete them from the fitness set
+#         del fitness[index]
+#
+#     random_selection = np.random.choice(fitness, 3, replace=False) # take 3 random from the remaining set
+#     random_selection = list(random_selection)   # make it a list
+#     index_random = []
+#     for item in random_selection:
+#         index_random.append(control.index(item))    # get the index
+#
+#     return index_beste, index_random
 
 
-    if first == True:
-        para = list(net.parameters()) # Unpack the parameters
-    else:
-        para = net # is already a normal list
-    params = []
-    mutation_indicator = np.random.choice(2, 1, p=[0, 1.0]) # mutation with probability of .2
-
-
-    print(list(net.parameters()))
-    if mutation_indicator == 1: # if mutate
-        for idx, mat in enumerate(list(net.parameters())):
-            mat = mat.data.cpu().numpy()
-            mat = np.random.permutation(mat)
-            params.append(torch.nn.Parameter(torch.from_numpy(mat)))
-
-
-            #net.register_parameter(params)
-
-        #list(net.parameters()) = para
-        #net = para
-
-        return net # return list of mutated weight matrices
-
-    else: # if not mutate
-        net = para
-        return net # return original network
 
 
 #net = NN([22, 5,3])

@@ -32,7 +32,7 @@ class MyDriver(Driver):
         self.data_logger = DataLogWriter() if logdata else None
 
 
-        #comment on of the two options below
+        # comment on of the two options below
         #first time:
         # self.populations = makepopulation(1)
         # torch.save(self.populations, 'total_population.pt')
@@ -41,14 +41,14 @@ class MyDriver(Driver):
         # torch.save(self.populations[3], 'species_3.pt')
         # torch.save(self.populations[4], 'species_4.pt')
         # torch.save(self.populations[5], 'species_5.pt')
-        #
+
 
         #group 1.
         #
         # self.layer_info = [22,9,3]
         # self.population = torch.load('/home/student/Documents/new/CI/species_1.pt')
         # self.filename = '/home/student/Documents/new/CI/species_1.pt'
-        #
+
         # #group 2:
 
         # self.layer_info  =[22,9,8,3]
@@ -56,19 +56,21 @@ class MyDriver(Driver):
         # self.filename = '/home/student/Documents/new/CI/species_2.pt'
 
         # #group 3:
-        # self.layer_info  = [22,9,8,7,3]
-        # self.population = torch.load('/home/student/Documents/new/CI/species_3.pt')
-        # self.filename = '/home/student/Documents/new/CI/species_3.pt'
+        self.layer_info  = [22,9,8,7,3]
+        self.population = torch.load('/home/student/Documents/new/CI/species_3.pt')
+        self.filename = '/home/student/Documents/new/CI/species_3.pt'
+        self.file1 ='fitneswerkthet.csv'
 
         # #group 4
-        self.layer_info = [22,9,8,7,6,3]
-        self.population = torch.load('/home/student/Documents/new/CI/species_4.pt')
-        self.filename = '/home/student/Documents/new/CI/species_4.pt'
+        # self.layer_info = [22,9,8,7,6,3]
+        # self.population = torch.load('/home/student/Documents/new/CI/species_4.pt')
+        # self.filename = '/home/student/Documents/new/CI/species_4.pt'
+        # self.file1 = open('fitnes_4.csv', 'a')
 
         # #group 5:
-        # layer_info = [22,9,8,7,6,5,3]
-        # self.population = torch.load('species_1.pt')
-        # self.filename = 'species_5.pt'
+        # self.layer_info = [22,9,8,7,6,5,3]
+        # self.population = torch.load('/home/student/Documents/new/CI/species_5.pt')
+        # self.filename = '/home/student/Documents/new/CI/species_5.pt'
 
         # when all these files exists:
         self.net, self.population = self.getModel(self.population, self.filename)
@@ -102,7 +104,7 @@ class MyDriver(Driver):
         drivers) successfully driven along the race track.
         """
 
-
+        print(carstate.current_lap_time)
         #make a command.
         command = Command()
 
@@ -124,8 +126,8 @@ class MyDriver(Driver):
 
         #calculate score
         self.number_of_carstates += 1
-        # score = self.fitnesfunction(carstate.damage, carstate.distance_raced, carstate.race_position)
-        score = self.fitnesfunction(carstate.damage, self.number_of_carstates, carstate.race_position)
+        score = self.fitnesfunction(carstate.damage, carstate.distance_raced, carstate.race_position)
+        #score = self.fitnesfunction(carstate.distance_raced, self.number_of_carstates, carstate.race_position)
 
         # when a certain level of damage is done or when the car is not moving:
         if self.number_of_carstates == 200:
@@ -136,17 +138,17 @@ class MyDriver(Driver):
             # checks if last individu is examined:
             if self.emptyList(self.population) == True:
                 print("lijst is leeeg")
-                parents = torch.load('parents_file_4.pt')
+                parents = torch.load('parents_file_3.pt')
                 print("parents:", parents)
                 new_population = self.Evolutionair(parents, self.layer_info)
 
                 self.saveNew(new_population, self.filename)
                 print("next generation is comming")
-                self.on_shutdown(command)
+                self.on_shotdown(command)
                 # save it in the right file.
 
             else: #when there are still neural networks available
-                self.on_shutdown(command)
+                self.on_shotdown(command)
 
 
             #self.model_number += 1
@@ -166,7 +168,7 @@ class MyDriver(Driver):
         """
 
         #print("carstate rpm:", carstate.rpm)
-        if command.accelerator > 0.03 and carstate.rpm > 8000:
+        if command.accelerator > 0.3 and carstate.rpm > 8000:
             command.gear = carstate.gear + 1
             #print("ga eens naar een hogere versnelling")
         elif command.accelerator < 0.3 and carstate.rpm < 2500:
@@ -179,7 +181,7 @@ class MyDriver(Driver):
         #save the children in two, files
         torch.save(children, filename)
         torch.save(children, 'last_generation.pt')
-        os.remove('parents_file_2.pt')
+        os.remove('parents_file_3.pt')
 
 
 
@@ -191,16 +193,16 @@ class MyDriver(Driver):
         fitnes: fitness score
         """
 
-        my_file = Path('parents_file_4.pt')
+        my_file = Path('parents_file_3.pt')
         if my_file.is_file():  # this means a file exists
-            old_net = torch.load('parents_file_4.pt')
+            old_net = torch.load('parents_file_3.pt')
             new_net = (net,fitnes)
             old_net.append(new_net)
-            torch.save(old_net, 'parents_file_4.pt')
+            torch.save(old_net, 'parents_file_3.pt')
         else:
             # this is the first model that is analysed.
             new_net = [(net,fitnes)]
-            torch.save(new_net, 'parents_file_4.pt' )
+            torch.save(new_net, 'parents_file_3.pt' )
 
     def emptyList(self, population):
         """
@@ -213,6 +215,20 @@ class MyDriver(Driver):
         else:
             return False
 
+    def makefile(self, output):
+        my_file = Path(self.file1)
+        if my_file.is_file():
+            print("hij bestaat")
+            csvfile = open(self.file1, 'a')
+            writer = csv.writer(csvfile)
+            writer.writerow(output)
+            csvfile.close()
+        else:
+            print("hij bstaat niet")
+            csvfile = open(self.file1, 'w')
+            writer = csv.writer(csvfile)
+            writer.writerow(output)
+            csvfile.close()
 
 
     def Evolutionair(self, parents, layers):
@@ -223,11 +239,15 @@ class MyDriver(Driver):
         layers: layer info that the current neural network has.
         """
         #make fitnes listst and parentslists
+        list_fitnes = []
+        list_parents = []
         for net_parents in parents:
-            list_parents = net_parents[0]
-            list_fitnes = net_parents[1]
+            list_parents.append(net_parents[0])
+            list_fitnes.append(net_parents[1])
 
         print("fitnes functions", list_fitnes)
+        self.makefile(list_fitnes)
+
         index_best, index_worst  = selectParents(list_fitnes)
 
         # best networks.
@@ -272,7 +292,7 @@ class MyDriver(Driver):
         position: the position of the car.
         """
 
-        score = (afstandcenter - damage)
+        score = (afstandcenter - damage)/position
         return score
 
     def create_ouput(self, input_line):
@@ -300,7 +320,7 @@ class MyDriver(Driver):
 
 
 
-    def on_shutdown(self, command):
+    def on_shotdown(self, command):
         """
         functions that is called when the server requested drive shutdown.
         """
