@@ -21,15 +21,15 @@ def makepopulation(parents_file = None):
                 family = []
                 net = create_nn(iterations, elem, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/own_races.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine_own.csv', path_to_filename3 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/multiple_Races.csv', lr = lr)
                 family.append(net)
-                populations[i] = family
+
     else:
-        populations = torch.load(parents_file)
-    return populations
+        family = torch.load(parents_file)
+    return family
 
- #[58, 39, 21, 6, 24, 3], [58, 33, 9, 15, 30, 6, 3], [58, 36, 42, 15, 24, 39, 18, 9, 3], [58, 36, 9, 6, 21, 15, 12, 27, 42, 3]
+ #[58, 39, 21, 6, 24, 3],
 
-populations = makepopulation()
-torch.save(populations, 'species_1.pt')
+#populations = makepopulation()
+#torch.save(populations, 'species_1.pt')
 #torch.save(populations[1], 'species_1.pt')
 #torch.save(populations[2], 'species_2.pt')
 #torch.save(populations[3], 'species_3.pt')
@@ -38,6 +38,12 @@ torch.save(populations, 'species_1.pt')
 
 species_1 = torch.load('species_1.pt')
 print(species_1[0])
+print(len(species_1))
+population=[]
+for key, value in species_1.items():
+    population.append(value)
+
+torch.save(population, 'species_1.pt')
 #
 # def makepopulation(generatie, parents_file = None):
 #     if parents_file == None:
