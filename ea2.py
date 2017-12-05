@@ -15,11 +15,11 @@ def makepopulation(parents_file = None):
         iterations = 1000
         lr = 45*10**-7
         populations = {}
+        family = []
         for elem in layer_info:
-            for i in range(20):
+            for i in range(1):
                 print(i)
-                family = []
-                net = create_nn(iterations, elem, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/own_races.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine_own.csv', path_to_filename3 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/multiple_Races.csv', lr = lr)
+                net = create_nn(iterations, elem, '/home/student/Desktop/CI/train_data/alpine_own.csv',path_to_filename2 ='/home/student/Desktop/CI/train_data/own_races.csv'  ,  path_to_filename3 = '/home/student/Desktop/CI/train_data/multiple_Races.csv', lr = lr)
                 family.append(net)
 
     else:
@@ -28,22 +28,21 @@ def makepopulation(parents_file = None):
 
  #[58, 39, 21, 6, 24, 3],
 
-#populations = makepopulation()
-#torch.save(populations, 'species_1.pt')
+
 #torch.save(populations[1], 'species_1.pt')
 #torch.save(populations[2], 'species_2.pt')
 #torch.save(populations[3], 'species_3.pt')
 #torch.save(populations[4], 'species_4.pt')
 #torch.save(populations[5], 'species_5.pt')
 
-species_1 = torch.load('species_1.pt')
-print(species_1[0])
-print(len(species_1))
-population=[]
-for key, value in species_1.items():
-    population.append(value)
-
-torch.save(population, 'species_1.pt')
+# species_1 = torch.load('species_1.pt')
+# print(species_1[0])
+# print(len(species_1))
+# population=[]
+# for key, value in species_1.items():
+#     population.append(value)
+#
+# torch.save(population, 'species_1.pt')
 #
 # def makepopulation(generatie, parents_file = None):
 #     if parents_file == None:
