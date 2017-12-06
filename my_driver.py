@@ -13,29 +13,21 @@ from ea2 import *
 import random
 import os
 from pathlib import Path
+from presButton import *
 
 
 
 class MyDriver(Driver):
 
     def __init__(self, logdata=True):
-        self.steering_ctrl = CompositeController(
-            ProportionalController(0.4),
-            IntegrationController(0.2, integral_limit=1.5),
-            DerivativeController(2)
-        )
 
-        # self.file1 = open('data2.csv', 'a')
-        self.acceleration_ctrl = CompositeController(
-            ProportionalController(3.7),
-        )
         self.data_logger = DataLogWriter() if logdata else None
 
 
         # comment on of the two options below
         #first time:
-        # self.populations = makepopulation(1)
-        # torch.save(self.populations, 'total_population.pt')
+        #self.populations = makepopulation()
+        #torch.save(self.populations, 'species_extra_2.pt')
         # torch.save(self.populations[1], 'species_1.pt')
         # torch.save(self.populations[2], 'species_2.pt')
         # torch.save(self.populations[3], 'species_3.pt')
@@ -45,9 +37,10 @@ class MyDriver(Driver):
 
         #group 1.
         #
-        # self.layer_info = [22,9,3]
-        # self.population = torch.load('/home/student/Documents/new/CI/species_1.pt')
-        # self.filename = '/home/student/Documents/new/CI/species_1.pt'
+        self.layer_info = [58, 27, 36, 24, 3]
+        self.population = torch.load('/home/student/Desktop/CI/complete_2_family.pt')
+        self.filename = '/home/student/Desktop/CI/complete_2_family.pt'
+        self.file1 ='fitnes_1_compleet.csv'
 
         # #group 2:
 
@@ -56,10 +49,10 @@ class MyDriver(Driver):
         # self.filename = '/home/student/Documents/new/CI/species_2.pt'
 
         # #group 3:
-        self.layer_info  = [22,9,8,7,3]
-        self.population = torch.load('/home/student/Documents/new/CI/species_3.pt')
-        self.filename = '/home/student/Documents/new/CI/species_3.pt'
-        self.file1 ='fitneswerkthet.csv'
+        #self.layer_info  = [58,33,9,15,30, 6, 3]
+        #self.population = torch.load('/home/student/Desktop/CI/species_3.pt')
+        #self.filename = '/home/student/Desktop/CI/species_3.pt'
+        # self.file1 ='fitneswerkthet.csv'
 
         # #group 4
         # self.layer_info = [22,9,8,7,6,3]
@@ -89,6 +82,7 @@ class MyDriver(Driver):
         """
 
         print("getting the right network and popping the network")
+        print (len(population))
         net = population[0]
         population.pop(0)
         torch.save(population, filename)
@@ -104,7 +98,7 @@ class MyDriver(Driver):
         drivers) successfully driven along the race track.
         """
 
-        print(carstate.current_lap_time)
+        #print(carstate.current_lap_time)
         #make a command.
         command = Command()
 
@@ -112,16 +106,19 @@ class MyDriver(Driver):
         input_line = [carstate.speed_x,carstate.distance_from_center, carstate.angle]
         for i in range(len(carstate.distances_from_edge)):
             input_line.append(carstate.distances_from_edge[i])
-        #for i in range(len(carstate.opponents)):
-        #    input_line.append(carstate.opponents[i])
+        for i in range(len(carstate.opponents)):
+            input_line.append(carstate.opponents[i])
 
         # get output:
         output = self.create_ouput((input_line))
 
         #make new state
         command.accelerator = output.data[0,0]
+        #print("accelerator", command.accelerator)
         command.brake = output.data[0,1]
+        #print("brake", command.brake)
         command.steering =  output.data[0,2]
+        #print(command.steering)
         self.getGear(carstate, command)
 
         #calculate score
@@ -130,7 +127,7 @@ class MyDriver(Driver):
         #score = self.fitnesfunction(carstate.distance_raced, self.number_of_carstates, carstate.race_position)
 
         # when a certain level of damage is done or when the car is not moving:
-        if self.number_of_carstates == 200:
+        if self.number_of_carstates == 2000:
 
             #save changes:
             self.saveModel(self.net, score)
@@ -138,7 +135,7 @@ class MyDriver(Driver):
             # checks if last individu is examined:
             if self.emptyList(self.population) == True:
                 print("lijst is leeeg")
-                parents = torch.load('parents_file_3.pt')
+                parents = torch.load('parents_file_1.pt')
                 print("parents:", parents)
                 new_population = self.Evolutionair(parents, self.layer_info)
 
@@ -151,12 +148,6 @@ class MyDriver(Driver):
                 self.on_shotdown(command)
 
 
-            #self.model_number += 1
-            #carstate.damage = 0
-            #self.list_of_scores.append(((self.group, self.net), score))
-            #self.net = self.changemodel(carstate.damage, carstate.distance_raced ,self.number_of_carstates )
-        #v_x = 250
-
         return command
 
     def getGear(self, carstate, command):
@@ -168,10 +159,10 @@ class MyDriver(Driver):
         """
 
         #print("carstate rpm:", carstate.rpm)
-        if command.accelerator > 0.3 and carstate.rpm > 8000:
+        if command.accelerator > 0 and carstate.rpm > 8000:
             command.gear = carstate.gear + 1
             #print("ga eens naar een hogere versnelling")
-        elif command.accelerator < 0.3 and carstate.rpm < 2500:
+        elif command.accelerator < 0 and carstate.rpm < 2500:
             command.gear = carstate.gear - 1
             #print("hij gaat weer door")
         else:
@@ -181,7 +172,7 @@ class MyDriver(Driver):
         #save the children in two, files
         torch.save(children, filename)
         torch.save(children, 'last_generation.pt')
-        os.remove('parents_file_3.pt')
+        os.remove('parents_file_1.pt')
 
 
 
@@ -193,16 +184,16 @@ class MyDriver(Driver):
         fitnes: fitness score
         """
 
-        my_file = Path('parents_file_3.pt')
+        my_file = Path('parents_file_1.pt')
         if my_file.is_file():  # this means a file exists
-            old_net = torch.load('parents_file_3.pt')
+            old_net = torch.load('parents_file_1.pt')
             new_net = (net,fitnes)
             old_net.append(new_net)
-            torch.save(old_net, 'parents_file_3.pt')
+            torch.save(old_net, 'parents_file_1.pt')
         else:
             # this is the first model that is analysed.
             new_net = [(net,fitnes)]
-            torch.save(new_net, 'parents_file_3.pt' )
+            torch.save(new_net, 'parents_file_1.pt' )
 
     def emptyList(self, population):
         """
@@ -268,19 +259,40 @@ class MyDriver(Driver):
 
         # it takes 2 parents (randomly) and makes to children of them
         # so we have 16 children
-        for i in range(8):
+        coupleset = []
+        i = 0
+        while i != 16:
             couple = random.sample(parents, 2)
-            child1 = create_child(couple[0], couple[1], layers, 1)
-            new_pop.append(child1)
-            child2 = create_child(couple[0], couple[1], layers, 2)
-            new_pop.append(child2)
+            if couple not in coupleset:
+                couple = random.sample(parents, 2)
+                child1 = create_child(couple[0], couple[1], layers, 1)
+                new_pop.append(child1)
+                child2 = create_child(couple[0], couple[1], layers, 2)
+                new_pop.append(child2)
+                coupleset.append(couple)
+                print("couple bestaat nog niet")
+                i = i +1
+                print(i)
+            else:
+                i = i
+                print("couple bestaat wel")
+
+        # for i in range(16):
+        #     child1 = create_child(couple[0], couple[1], layers, 1)
+        #     new_pop.append(child1)
+        #     child2 = create_child(couple[0], couple[1], layers, 2)
+        #     new_pop.append(child2)
 
         # we append the four best neural networks.
         new_pop.append(best[0])
         new_pop.append(best[1])
         new_pop.append(best[2])
         new_pop.append(best[3])
-
+        new_pop.append(best[4])
+        new_pop.append(best[5])
+        new_pop.append(best[6])
+        new_pop.append(best[7])
+        print ("new", len(new_pop))
         return new_pop
 
 
@@ -292,7 +304,9 @@ class MyDriver(Driver):
         position: the position of the car.
         """
 
-        score = (afstandcenter - damage)/position
+        score = (afstandcenter - (damage/500))/position
+        if score == 0:
+            score = 0
         return score
 
     def create_ouput(self, input_line):
@@ -303,7 +317,7 @@ class MyDriver(Driver):
         """
         tens = torch.FloatTensor(input_line)
         y_variable = torch.autograd.Variable(tens, requires_grad=False)
-        ipt = y_variable.view(1, 22)
+        ipt = y_variable.view(1, 58)
 
         out = self.net(ipt)
         return out

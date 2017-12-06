@@ -11,7 +11,7 @@ from train import *
 
 def makepopulation(parents_file = None):
     if parents_file == None:
-        layer_info = [[58, 39, 21, 6, 24, 3]]
+        layer_info = [[58, 27, 36, 24, 3]]
         iterations = 1000
         lr = 45*10**-7
         populations = {}
@@ -19,53 +19,11 @@ def makepopulation(parents_file = None):
         for elem in layer_info:
             for i in range(20):
                 print(i)
-                net = create_nn(iterations, elem, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/own_races.csv',path_to_filename2 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/alpine_own.csv', path_to_filename3 = '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/multiple_Races.csv', lr = lr)
+                net = create_nn(iterations, elem, '/home/student/Desktop/CI/train_data/alpine_own.csv',path_to_filename2 ='/home/student/Desktop/CI/train_data/own_races.csv'  ,  path_to_filename3 = '/home/student/Desktop/CI/train_data/multiple_Races.csv', lr = lr)
                 family.append(net)
     else:
         family = torch.load(parents_file)
     return family
-
- #[58, 39, 21, 6, 24, 3],
-
-
-#torch.save(populations[1], 'species_1.pt')
-#torch.save(populations[2], 'species_2.pt')
-#torch.save(populations[3], 'species_3.pt')
-#torch.save(populations[4], 'species_4.pt')
-#torch.save(populations[5], 'species_5.pt')
-
-#species_1 = torch.load('species_1.pt')
-#print(len(species_1))
-#print(len(species_1))
-#population=[]
-#for key, value in species_1.items():
-#    population.append(value)
-
-#torch.save(population, 'species_1.pt')
-
-
-#
-# def makepopulation(generatie, parents_file = None):
-#     if parents_file == None:
-#         lays = [1,2,3,4,5]
-#         nodes = [9,8,7,6,5]
-#         populations = {}
-#         for j in range(1, 6):
-#             pop = []
-#             for i in range(20):
-#                 layers = []
-#                 layers.append(22)
-#                 for z in range(j):
-#                     layers.append(nodes[z])
-#                 layers.append(3)
-#                 net = NN(layers)
-#                 #create_nn(1000, layers, '/Users/loisvanvliet/Documents/studie/2017:2018/Computational intelligence/CI/train_data/aalborg.csv')
-#                 create_nn(1000, layers, '/home/student/Documents/new/CI/train_data/aalborg.csv')
-#                 pop.append(net)
-#             populations[j] = pop
-#     else:
-#         populations = torch.load(parents_file)
-#     return populations
 
 
 #populations = makepopulation(1)
@@ -114,12 +72,12 @@ def selectParents(fitness = None):
 
     control = fitness[:] # clone fitness for getting index of random values later on
 
-    index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-5:] # Take 5 best
+    index_beste = sorted(range(len(fitness)), key=lambda i: fitness[i])[-16:] # Take 5 best
 
     for index in sorted(index_beste, reverse=True): # delete them from the fitness set
         del fitness[index]
 
-    random_selection = np.random.choice(fitness, 3, replace=False) # take 3 random from the remaining set
+    random_selection = np.random.choice(fitness, 8, replace=False) # take 3 random from the remaining set
     random_selection = list(random_selection)   # make it a list
     index_random = []
     for item in random_selection:
