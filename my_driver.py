@@ -13,7 +13,7 @@ from ea2 import *
 import random
 import os
 from pathlib import Path
-from presButton import *
+#from presButton import *
 
 
 
@@ -26,8 +26,8 @@ class MyDriver(Driver):
 
         # comment on of the two options below
         #first time:
-        #self.populations = makepopulation()
-        #torch.save(self.populations, 'species_extra_2.pt')
+        self.populations = makepopulation()
+        torch.save(self.populations, 'species_extra_3.pt')
         # torch.save(self.populations[1], 'species_1.pt')
         # torch.save(self.populations[2], 'species_2.pt')
         # torch.save(self.populations[3], 'species_3.pt')

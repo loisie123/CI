@@ -13,6 +13,11 @@ print (len(pop1))
 for i in pop1:
     new_pop.append(i)
 
+
+pop2 = torch.load('/home/student/Desktop/CI/species_extra_3.pt')
+for i in pop2:
+    new_pop.append(i)
+
 print(len(new_pop))
 
-torch.save(new_pop, 'complete_2_family.pt')
+torch.save(new_pop, 'complete_3_family.pt')
